@@ -50,5 +50,16 @@ service cloud.firestore {
 
       allow delete: if isAdmin();
     }
+
+    match /pushTokens/{tokenId} {
+      allow read: if false; // only read by Cloud Functions via the Admin SDK, which bypasses rules
+      allow create: if signedIn() && request.resource.data.email == request.auth.token.email;
+      allow update: if signedIn() && resource.data.email == request.auth.token.email;
+      allow delete: if signedIn() && resource.data.email == request.auth.token.email;
+    }
+
+    match /notifyState/{stateId} {
+      allow read, write: if false; // only touched by Cloud Functions via the Admin SDK
+    }
   }
 }

@@ -432,6 +432,7 @@
         <button type="button" data-lang="ar">AR</button>
       </div>
       <button class="db-pill" id="dbStatusBtn"><span class="status-dot dot-gray" id="dbStatusDot"></span><span id="dbStatusText">Database: not connected</span></button>
+      <button class="btn btn-ghost btn-sm" id="notifyBtn" hidden>🔔 Enable notifications</button>
       <button class="btn btn-ghost btn-sm" id="settingsBtn" hidden>Station settings</button>
       <button class="btn btn-ghost" id="exportBtn" hidden>Export data</button>
       <button class="btn btn-primary" id="addVehicleBtn" hidden>+ Add vehicle</button>
@@ -1314,6 +1315,10 @@ window.addEventListener('unhandledrejection', function(e){
 
   function renderChrome(){
     var loggedIn = !!state.user && !!state.role;
+    var notifyBtn = document.getElementById('notifyBtn');
+    notifyBtn.hidden = !loggedIn || !('Notification' in window) || !('serviceWorker' in navigator);
+    notifyBtn.textContent = (window.Notification && Notification.permission === 'granted') ? '🔔 Notifications on' : '🔔 Enable notifications';
+    notifyBtn.disabled = window.Notification && Notification.permission === 'granted';
     document.getElementById('settingsBtn').hidden = !isAdmin();
     document.getElementById('exportBtn').hidden = !loggedIn;
     document.getElementById('addVehicleBtn').hidden = !isAdmin();
@@ -2593,6 +2598,73 @@ window.addEventListener('unhandledrejection', function(e){
     });
   }
 
+  /* ============ Push notifications (Firebase Cloud Messaging) ============ */
+  // firebase-bundle.js doesn't include the Messaging module (it's a trimmed
+  // build), so messaging is loaded fresh from the CDN as a separate, named
+  // secondary app. It shares the same Firebase project — just a different
+  // in-memory SDK instance — so Firestore writes below still go to the same
+  // database via the main `db`/`doc`/`setDoc` from the local bundle.
+  //
+  // IMPORTANT: replace VAPID_KEY with your own before this will work — get it
+  // from Firebase Console → Project settings → Cloud Messaging → Web Push
+  // certificates → "Generate key pair". See README for the full setup guide.
+  var VAPID_KEY = "BG72ypkMVexgOruiTAYZGc-pvGKRkLSm49DDV6ygBO-v6Lk-1h9zFSy296-Wg5babYxoQ38ppT8vpllwBymrDXI";
+
+  async function enableNotifications(){
+    var notifyBtn = document.getElementById('notifyBtn');
+    if(!('Notification' in window) || !('serviceWorker' in navigator)){
+      alertError('Not supported', new Error('This browser does not support push notifications.'));
+      return;
+    }
+    if(!state.user || !state.user.email){
+      alertError('Sign in required', new Error('Sign in first, then enable notifications.'));
+      return;
+    }
+    if(VAPID_KEY.indexOf('REPLACE_WITH') === 0){
+      alertError('Not configured yet', new Error('The app owner needs to add a Cloud Messaging VAPID key before push notifications will work. See README.'));
+      return;
+    }
+    notifyBtn.disabled = true;
+    try{
+      var permission = await Notification.requestPermission();
+      if(permission !== 'granted'){
+        notifyBtn.disabled = false;
+        return;
+      }
+      var msgMod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js");
+      var appMod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+      var secondaryApp = appMod.initializeApp(DEFAULT_FIREBASE_CONFIG, 'messaging');
+      var messaging = msgMod.getMessaging(secondaryApp);
+
+      // Let Firebase find/register the service worker itself (it automatically
+      // looks for /firebase-messaging-sw.js) rather than doing it manually here —
+      // manual registration was racing with Firebase's internal state and causing
+      // "Cannot read properties of undefined (reading 'pushManager')".
+      var token = await msgMod.getToken(messaging, {vapidKey: VAPID_KEY});
+      if(!token) throw new Error('Could not get a device token.');
+
+      var email = (state.user.email||'').toLowerCase();
+      await setDoc(doc(db, 'pushTokens', token), {
+        token: token,
+        email: email,
+        platform: navigator.userAgent,
+        updatedAt: new Date().toISOString()
+      });
+
+      // Foreground messages don't auto-show as OS notifications — display them manually.
+      msgMod.onMessage(messaging, function(payload){
+        var title = (payload.notification && payload.notification.title) || 'Service reminder';
+        var body = (payload.notification && payload.notification.body) || '';
+        try{ new Notification(title, {body: body, icon: '/favicon.svg'}); }catch(e){}
+      });
+
+      renderChrome();
+    }catch(err){
+      notifyBtn.disabled = false;
+      alertError('Could not enable notifications', err);
+    }
+  }
+
   /* ============ Firebase connect + auth wiring ============ */
   function connectFirestore(cfg){
     state.dbConnecting = true;
@@ -2670,6 +2742,7 @@ window.addEventListener('unhandledrejection', function(e){
 
   document.getElementById('addVehicleBtn').addEventListener('click', openAddVehicleModal);
   document.getElementById('addVehicleTile').addEventListener('click', openAddVehicleModal);
+  document.getElementById('notifyBtn').addEventListener('click', enableNotifications);
   document.getElementById('exportBtn').addEventListener('click', exportData);
   document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
   document.getElementById('dbStatusBtn').addEventListener('click', openFirestoreModal);
