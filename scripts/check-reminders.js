@@ -139,7 +139,8 @@ async function main() {
         entry.isCustom ? r.typeKey === "custom" && (r.customLabel || "Other") === entry.label : r.typeKey === entry.key
       );
       const { status } = statusForEntry(vehicle, recsForEntry);
-      const stateKey = `${vehicle.id}_${entry.key}_${entry.label}`;
+      const safeLabel = entry.label.replace(/[\/\s]+/g, "-");
+      const stateKey = `${vehicle.id}_${entry.key}_${safeLabel}`;
 
       jobs.push(
         (async () => {
