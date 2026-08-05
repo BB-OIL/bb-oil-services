@@ -1,0 +1,2698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BB-OIL Services</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A1930;
+    --panel:#102847;
+    --panel-raised:#163459;
+    --panel-raised-2:#1C4068;
+    --steel:#35547D;
+    --chalk:#EAF1F8;
+    --chalk-dim:#9FB4CE;
+    --chalk-faint:#6D84A3;
+    --surface:#FFFFFF;
+    --surface-alt:#EEF3F9;
+    --surface-border:#E1E7EF;
+    --surface-border-strong:#CDD9E6;
+    --text-dark:#132A4A;
+    --text-dark-dim:#51698C;
+    --text-dark-faint:#8CA0BC;
+    --amber:#F3801E;
+    --amber-dim:rgba(243,128,30,0.14);
+    --red:#E5484D;
+    --red-dim:rgba(229,72,77,0.12);
+    --green:#2E9464;
+    --green-dim:rgba(46,148,100,0.13);
+    --line-chrome:rgba(234,241,248,0.10);
+    --line-chrome-strong:rgba(234,241,248,0.18);
+    --display:'Rajdhani',sans-serif;
+    --body:'IBM Plex Sans',sans-serif;
+    --mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  [hidden]{display:none !important;}
+  body{
+    background:var(--surface-alt);
+    color:var(--text-dark);
+    font-family:var(--body);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--amber);color:#fff;}
+  button{font-family:var(--body);cursor:pointer;}
+  input,select,textarea{font-family:var(--body);}
+  :focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+
+  .app{display:flex;flex-direction:column;min-height:100vh;}
+
+  /* ---------- Topbar (dark chrome) ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 28px;flex-wrap:wrap;gap:10px;
+    border-bottom:1px solid var(--line-chrome);
+    background:var(--ink);
+    position:sticky;top:0;z-index:20;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:1.5px;color:var(--chalk);}
+  .brand-mark{width:28px;height:28px;display:flex;align-items:center;justify-content:center;}
+  .brand-tag{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--amber);border:1px solid var(--amber);border-radius:3px;padding:2px 6px;margin-inline-start:6px;text-transform:uppercase;}
+  .role-tag{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--chalk-dim);border:1px solid var(--line-chrome-strong);border-radius:3px;padding:2px 6px;margin-inline-start:6px;text-transform:uppercase;}
+  .topbar-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+
+  /* Buttons default to the light/white context (content area, modals) */
+  .btn{
+    border:1px solid var(--surface-border-strong);background:var(--surface-alt);color:var(--text-dark);
+    padding:9px 16px;border-radius:6px;font-size:13.5px;font-weight:500;
+    transition:border-color .15s ease, transform .1s ease, background .15s ease;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .btn:hover{border-color:var(--text-dark-faint);background:var(--surface-border);}
+  .btn:active{transform:translateY(1px);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+  .btn-primary{background:var(--amber);color:#fff;border-color:var(--amber);font-weight:600;}
+  .btn-primary:hover{background:#FF9A42;border-color:#FF9A42;}
+  .btn-danger{color:var(--red);border-color:rgba(229,72,77,0.4);background:transparent;}
+  .btn-danger:hover{background:var(--red-dim);}
+  .btn-ghost{background:transparent;border-color:transparent;color:var(--text-dark-dim);}
+  .btn-ghost:hover{color:var(--text-dark);background:var(--surface-border);}
+  .btn-sm{padding:6px 11px;font-size:12.5px;}
+  .btn-block{width:100%;justify-content:center;}
+
+  /* Buttons living in the dark topbar/sidebar chrome get the dark-context look */
+  .topbar .btn, .db-pill{
+    border-color:var(--line-chrome-strong);background:var(--panel-raised);color:var(--chalk);
+  }
+  .topbar .btn:hover{border-color:var(--chalk-faint);background:var(--panel-raised-2);}
+  .topbar .btn-ghost{background:transparent;border-color:transparent;color:var(--chalk-dim);}
+  .topbar .btn-ghost:hover{color:var(--chalk);background:var(--panel-raised);}
+  .topbar .btn-primary{background:var(--amber);color:#fff;border-color:var(--amber);}
+  .topbar .btn-primary:hover{background:#FF9A42;border-color:#FF9A42;}
+
+  .db-pill{
+    display:inline-flex;align-items:center;gap:7px;
+    border-radius:20px;padding:6px 13px 6px 10px;
+    font-size:12.5px;
+  }
+  .db-pill:hover{border-color:var(--chalk-faint);}
+
+  .lang-switch{display:flex;gap:2px;background:var(--panel-raised);border:1px solid var(--line-chrome-strong);border-radius:20px;padding:3px;}
+  .lang-switch button{
+    background:transparent;border:none;color:var(--chalk-dim);padding:5px 10px;border-radius:16px;
+    font-family:var(--mono);font-size:11px;letter-spacing:0.5px;font-weight:600;
+  }
+  .lang-switch button.active{background:var(--amber);color:#fff;}
+  .lang-switch button:hover:not(.active){color:var(--chalk);}
+
+  /* ---------- Body layout ---------- */
+  .body{display:flex;flex:1;min-height:0;}
+  .sidebar{
+    width:270px;flex-shrink:0;border-inline-end:1px solid var(--line-chrome);
+    padding:20px 14px;display:flex;flex-direction:column;gap:6px;
+    background:var(--ink);color:var(--chalk);
+  }
+  .sidebar-section-label{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--chalk-faint);text-transform:uppercase;padding:0 8px 8px;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:7px;
+    color:var(--chalk-dim);font-size:14px;font-weight:500;border:1px solid transparent;
+  }
+  .nav-item:hover{background:var(--panel);cursor:pointer;}
+  .nav-item.active{background:var(--panel-raised);color:var(--chalk);border-color:var(--line-chrome-strong);}
+  .nav-icon{width:16px;height:16px;flex-shrink:0;opacity:.85;}
+
+  .vehicle-list{display:flex;flex-direction:column;gap:4px;margin-top:2px;}
+  .vehicle-item{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:11px 10px;border-radius:7px;border:1px solid transparent;cursor:pointer;
+  }
+  .vehicle-item:hover{background:var(--panel);}
+  .vehicle-item.active{background:var(--panel-raised);border-color:var(--line-chrome-strong);}
+  .vehicle-item-main{display:flex;flex-direction:column;min-width:0;}
+  .vehicle-item-name{font-size:14px;font-weight:600;color:var(--chalk);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .vehicle-item-sub{font-size:11.5px;color:var(--chalk-faint);font-family:var(--mono);}
+  .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .dot-green{background:var(--green);box-shadow:0 0 0 3px var(--green-dim);}
+  .dot-amber{background:var(--amber);box-shadow:0 0 0 3px var(--amber-dim);}
+  .dot-red{background:var(--red);box-shadow:0 0 0 3px var(--red-dim);}
+  .dot-gray{background:var(--chalk-faint);}
+
+  .add-vehicle-tile{
+    margin-top:10px;border:1px dashed var(--line-chrome-strong);background:transparent;color:var(--chalk-dim);
+    border-radius:7px;padding:11px;font-size:13px;text-align:start;
+  }
+  .add-vehicle-tile:hover{border-color:var(--amber);color:var(--amber);}
+  .add-vehicle-tile:disabled{opacity:.4;cursor:not-allowed;}
+
+  .main{flex:1;min-width:0;padding:26px 32px 60px;overflow-y:auto;background:var(--surface-alt);}
+  .main-inner{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:26px;}
+
+  /* ---------- Empty / login states ---------- */
+  .empty-state{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:90px 20px 30px;color:var(--text-dark-dim);gap:14px;
+  }
+  .empty-state h2{font-family:var(--display);font-size:26px;color:var(--text-dark);margin:0;}
+  .empty-state p{margin:0;max-width:400px;font-size:14px;line-height:1.6;}
+
+  .auth-wrap{
+    flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;
+    background:var(--ink);
+  }
+  .auth-card{
+    width:100%;max-width:380px;background:var(--surface);border:1px solid var(--surface-border);
+    border-radius:14px;padding:30px 28px;color:var(--text-dark);
+    box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  }
+  .auth-brand{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--surface-border);}
+  .auth-brand-mark{width:28px;height:28px;display:flex;align-items:center;justify-content:center;}
+  .auth-brand-name{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:1.1px;color:var(--text-dark);}
+  .auth-brand-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:1.7px;color:var(--amber);border:1px solid var(--amber);border-radius:3px;padding:2px 6px;text-transform:uppercase;}
+  .auth-card h2{font-family:var(--display);font-size:24px;margin:0 0 4px;}
+  .auth-card .sub{font-size:13px;color:var(--text-dark-dim);margin-bottom:22px;line-height:1.5;}
+  .auth-toggle{display:flex;gap:6px;background:var(--surface-alt);border-radius:8px;padding:4px;margin-bottom:20px;}
+  .auth-toggle button{flex:1;background:transparent;border:none;color:var(--text-dark-dim);padding:8px;border-radius:6px;font-size:13px;font-weight:500;}
+  .auth-toggle button.active{background:var(--surface);color:var(--text-dark);box-shadow:0 1px 3px rgba(19,42,74,0.15);}
+
+  /* ---------- Setup card ---------- */
+  .setup-card{
+    background:var(--surface);border:1px solid var(--surface-border);border-radius:12px;
+    padding:22px 24px;max-width:640px;margin:20px auto 0;
+  }
+
+  /* ---------- Vehicle heading ---------- */
+  .vehicle-heading{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+  .vehicle-heading h1{font-family:var(--display);font-weight:700;font-size:34px;margin:0;letter-spacing:.3px;color:var(--text-dark);}
+  .vehicle-sub{font-family:var(--mono);font-size:12.5px;color:var(--text-dark-dim);margin-top:4px;letter-spacing:.5px;}
+  .vehicle-actions{display:flex;gap:8px;}
+
+  /* ---------- Cluster / gauge panel ---------- */
+  .cluster-panel{
+    background:var(--surface);
+    border:1px solid var(--surface-border);border-radius:14px;padding:26px 28px;
+    box-shadow:0 1px 3px rgba(19,42,74,0.06);
+  }
+  .cluster-row{display:flex;align-items:center;gap:36px;margin-top:18px;flex-wrap:wrap;}
+  .gauge-wrap{flex-shrink:0;width:260px;}
+  .gauge-caption{text-align:center;margin-top:2px;}
+  .gauge-caption .gc-title{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--text-dark-faint);text-transform:uppercase;}
+  .gauge-caption .gc-value{font-family:var(--display);font-size:20px;font-weight:600;margin-top:2px;}
+
+  .odometer-wrap{flex:1;min-width:230px;display:flex;flex-direction:column;gap:10px;}
+  .odometer-label{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--text-dark-faint);text-transform:uppercase;}
+  .odometer{display:flex;gap:5px;direction:ltr;}
+  .odo-digit{
+    background:#0A1930;border:1px solid var(--ink);border-radius:5px;
+    width:38px;height:52px;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:26px;font-weight:600;color:var(--amber);
+    box-shadow:inset 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .odo-unit{align-self:flex-end;font-family:var(--mono);font-size:12px;color:var(--text-dark-faint);margin-left:2px;}
+  .mileage-form{display:flex;gap:8px;margin-top:4px;}
+  .mileage-form input{
+    background:var(--surface-alt);border:1px solid var(--surface-border-strong);color:var(--text-dark);
+    padding:9px 11px;border-radius:6px;font-size:13.5px;width:150px;
+  }
+
+  /* ---------- Reminders ---------- */
+  .section-title{font-family:var(--display);font-size:19px;font-weight:600;margin:0 0 12px;letter-spacing:.3px;color:var(--text-dark);}
+  .reminder-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+  .reminder-card{
+    border:1px solid var(--surface-border);background:var(--surface);border-radius:10px;padding:14px 15px;
+    border-left:3px solid var(--text-dark-faint);
+    box-shadow:0 1px 3px rgba(19,42,74,0.05);
+  }
+  .reminder-card.status-ok{border-left-color:var(--green);}
+  .reminder-card.status-soon{border-left-color:var(--amber);}
+  .reminder-card.status-overdue{border-left-color:var(--red);}
+  .reminder-card.status-none{border-left-color:var(--surface-border-strong);opacity:.85;}
+  .reminder-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .reminder-type{font-size:14px;font-weight:600;color:var(--text-dark);}
+  .reminder-badge{font-family:var(--mono);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:20px;}
+  .badge-ok{background:var(--green-dim);color:var(--green);}
+  .badge-soon{background:var(--amber-dim);color:var(--amber);}
+  .badge-overdue{background:var(--red-dim);color:var(--red);}
+  .badge-none{background:var(--surface-alt);color:var(--text-dark-faint);}
+  .reminder-detail{font-size:12px;color:var(--text-dark-dim);margin-top:8px;line-height:1.5;font-family:var(--mono);}
+  .reminder-bar{height:4px;border-radius:3px;background:var(--surface-alt);margin-top:10px;overflow:hidden;}
+  .reminder-bar-fill{height:100%;border-radius:3px;}
+
+  /* ---------- History ---------- */
+  .history-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+  .history-controls{display:flex;gap:8px;flex-wrap:wrap;}
+  .history-controls select,.history-controls input{
+    background:var(--surface);border:1px solid var(--surface-border-strong);color:var(--text-dark);
+    padding:8px 10px;border-radius:6px;font-size:13px;
+  }
+  .table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px;}
+  .history-table{width:100%;min-width:560px;border-collapse:collapse;font-size:13.5px;background:var(--surface);border:1px solid var(--surface-border);border-radius:10px;overflow:hidden;}
+  .history-table thead th{
+    text-align:start;font-family:var(--mono);font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--text-dark-faint);padding:12px 12px 10px;border-bottom:1px solid var(--surface-border);font-weight:500;
+  }
+  .history-table tbody td{padding:13px 12px;border-bottom:1px solid var(--surface-border);vertical-align:top;color:var(--text-dark);}
+  .history-table tbody tr:last-child td{border-bottom:none;}
+  .history-table tbody tr:hover{background:var(--surface-alt);}
+  .hist-type{font-weight:600;}
+  .hist-notes{color:var(--text-dark-dim);max-width:260px;}
+  .hist-actions{display:flex;gap:6px;justify-content:flex-end;}
+  .row-actions-cell{text-align:end;}
+  .empty-row td{text-align:center;color:var(--text-dark-faint);padding:40px 10px;font-size:13px;}
+
+  /* ---------- Overview ---------- */
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
+  .stat-card{background:var(--surface);border:1px solid var(--surface-border);border-radius:10px;padding:16px 18px;box-shadow:0 1px 3px rgba(19,42,74,0.05);}
+  .stat-card .num{font-family:var(--display);font-size:32px;font-weight:700;color:var(--text-dark);}
+  .stat-card .lbl{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--text-dark-faint);text-transform:uppercase;margin-top:2px;}
+  .stat-card.stat-red .num{color:var(--red);}
+  .stat-card.stat-amber .num{color:var(--amber);}
+  .stat-card.stat-green .num{color:var(--green);}
+
+  .alert-list{display:flex;flex-direction:column;gap:8px;}
+  .alert-row{
+    display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--surface-border);
+    border-radius:9px;padding:12px 14px;cursor:pointer;
+    box-shadow:0 1px 3px rgba(19,42,74,0.05);
+  }
+  .alert-row:hover{border-color:var(--surface-border-strong);}
+  .alert-row .status-dot{width:9px;height:9px;}
+  .alert-main{flex:1;min-width:0;}
+  .alert-veh{font-size:13px;font-weight:600;color:var(--text-dark);}
+  .alert-type{font-size:12.5px;color:var(--text-dark-dim);}
+  .alert-when{font-family:var(--mono);font-size:11.5px;color:var(--text-dark-faint);white-space:nowrap;}
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(10,25,48,0.55);backdrop-filter:blur(2px);
+    display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;
+  }
+  .modal-card{
+    background:var(--surface);border:1px solid var(--surface-border);border-radius:12px;color:var(--text-dark);
+    width:100%;max-width:480px;max-height:88vh;overflow-y:auto;padding:24px 26px 22px;
+    box-shadow:0 20px 60px rgba(10,25,48,0.35);
+  }
+  .modal-card.wide{max-width:600px;}
+  .modal-title{font-family:var(--display);font-size:22px;font-weight:700;margin:0 0 4px;color:var(--text-dark);}
+  .modal-sub{font-size:12.5px;color:var(--text-dark-faint);margin-bottom:18px;}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+  .field label{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dark-dim);}
+  .field input,.field select,.field textarea{
+    background:var(--surface-alt);border:1px solid var(--surface-border-strong);color:var(--text-dark);
+    padding:10px 11px;border-radius:6px;font-size:14px;width:100%;
+  }
+  .field textarea{resize:vertical;min-height:64px;}
+  .field textarea.mono{font-family:var(--mono);font-size:12.5px;min-height:130px;}
+  .field-row{display:flex;gap:10px;}
+  .field-row .field{flex:1;}
+  .interval-row{display:flex;gap:8px;align-items:flex-end;}
+  .interval-row .field{flex:1;margin-bottom:0;}
+  .interval-row select{width:110px;flex-shrink:0;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap;}
+  .modal-error{color:var(--red);font-size:12.5px;margin-bottom:10px;display:none;white-space:pre-wrap;}
+  .modal-note{background:var(--surface-alt);border:1px solid var(--surface-border);border-radius:8px;padding:12px 14px;font-size:12.5px;color:var(--text-dark-dim);line-height:1.7;margin-bottom:16px;}
+  .modal-note ol{margin:6px 0 0;padding-left:18px;}
+  .modal-note code{color:var(--amber);font-family:var(--mono);}
+  .status-line{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:16px;color:var(--text-dark);}
+  .guess-line{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;}
+  .guess-note{font-size:11.5px;color:var(--text-dark-faint);font-family:var(--mono);}
+
+  .hint{font-size:11.5px;color:var(--text-dark-faint);margin-top:-2px;}
+
+  /* ---------- Responsive: tablet / narrow desktop ---------- */
+  @media (max-width:980px){
+    .main-inner{max-width:100%;}
+  }
+
+  @media (max-width:900px){
+    .topbar{padding:14px 18px;}
+    .topbar-actions{gap:8px;}
+  }
+
+  @media (max-width:820px){
+    .body{flex-direction:column;}
+    .sidebar{width:100%;flex-direction:row;overflow-x:auto;border-inline-end:none;border-bottom:1px solid var(--line-chrome);padding:12px 14px;}
+    .sidebar-section-label{display:none;}
+    .vehicle-list{flex-direction:row;}
+    .vehicle-item{flex-shrink:0;}
+    .add-vehicle-tile{flex-shrink:0;margin-top:0;white-space:nowrap;}
+    .main{padding:20px 16px 50px;}
+    .cluster-row{gap:20px;}
+  }
+
+  /* ---------- Responsive: phones ---------- */
+  @media (max-width:680px){
+    .topbar{padding:12px 14px;gap:8px;}
+    .brand{font-size:18px;gap:8px;}
+    .brand-mark{width:22px;height:22px;}
+    .brand-mark svg{width:20px;height:20px;}
+    .brand-tag{display:none;}
+    .topbar-actions{gap:6px;width:100%;justify-content:flex-start;}
+    .topbar .btn{padding:7px 12px;font-size:12.5px;}
+    .db-pill{padding:5px 11px 5px 9px;font-size:12px;}
+    .lang-switch{padding:2px;}
+    .lang-switch button{padding:4px 8px;font-size:10.5px;}
+
+    .main{padding:16px 12px 44px;}
+    .main-inner{gap:20px;}
+
+    .vehicle-heading{gap:10px;}
+    .vehicle-heading h1{font-size:25px;}
+    .vehicle-actions{width:100%;}
+    .vehicle-actions .btn{flex:1;justify-content:center;}
+
+    .cluster-panel{padding:18px 16px;border-radius:12px;}
+    .cluster-row{flex-direction:column;gap:22px;}
+    .gauge-wrap{width:100%;max-width:250px;flex-shrink:1;margin:0 auto;}
+    .odometer-wrap{width:100%;min-width:0;}
+    .mileage-form{width:100%;}
+    .mileage-form input{width:auto;flex:1;min-width:0;}
+
+    .section-title{font-size:17px;}
+    .history-header{flex-direction:column;align-items:stretch;}
+    .history-controls{flex-direction:column;align-items:stretch;}
+    .history-controls select,.history-controls input{width:100%;}
+
+    .field-row{flex-direction:column;gap:14px;}
+    .interval-row{flex-wrap:wrap;}
+    .interval-row select{width:100%;}
+
+    .modal-overlay{padding:0;align-items:flex-end;}
+    .modal-card{max-width:100%;width:100%;border-radius:16px 16px 0 0;max-height:92vh;padding:20px 18px 18px;}
+    .modal-card.wide{max-width:100%;}
+    .modal-actions{flex-direction:column-reverse;}
+    .modal-actions .btn{width:100%;justify-content:center;}
+
+    .auth-wrap{padding:24px 14px;}
+    .auth-card{padding:24px 18px;border-radius:12px;}
+
+    .setup-card{padding:18px 16px;margin-top:12px;}
+
+    .stat-row{grid-template-columns:repeat(2,1fr);}
+    .reminder-grid{grid-template-columns:1fr;}
+  }
+
+  @media (max-width:400px){
+    .odo-digit{width:29px;height:42px;font-size:19px;}
+    .odo-unit{font-size:11px;}
+    .stat-row{grid-template-columns:1fr 1fr;gap:8px;}
+    .stat-card{padding:12px 14px;}
+    .stat-card .num{font-size:26px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand" id="brandBlock">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+          <path d="M4 15.5 L6 9 C6.4 7.8 7.5 7 8.8 7 H15.2 C16.5 7 17.6 7.8 18 9 L20 15.5" stroke="#F3801E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="3.2" y="15" width="17.6" height="4.6" rx="1.4" fill="none" stroke="#F3801E" stroke-width="1.6"/>
+          <circle cx="7" cy="19.6" r="1.4" fill="#F3801E"/>
+          <circle cx="17" cy="19.6" r="1.4" fill="#F3801E"/>
+          <line x1="6" y1="11.5" x2="18" y2="11.5" stroke="#F3801E" stroke-width="1.2"/>
+        </svg>
+      </span>
+      <span id="brandName">Your Station Name</span>
+      <span class="brand-tag" id="brandTag">Service Log</span>
+      <span class="role-tag" id="roleTag" hidden></span>
+    </div>
+    <div class="topbar-actions">
+      <div class="lang-switch" id="langSwitch">
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" data-lang="fr">FR</button>
+        <button type="button" data-lang="ar">AR</button>
+      </div>
+      <button class="db-pill" id="dbStatusBtn"><span class="status-dot dot-gray" id="dbStatusDot"></span><span id="dbStatusText">Database: not connected</span></button>
+      <button class="btn btn-ghost btn-sm" id="settingsBtn" hidden>Station settings</button>
+      <button class="btn btn-ghost" id="exportBtn" hidden>Export data</button>
+      <button class="btn btn-primary" id="addVehicleBtn" hidden>+ Add vehicle</button>
+      <button class="btn btn-ghost btn-sm" id="signOutBtn" hidden>Sign out</button>
+    </div>
+  </header>
+
+  <div class="body">
+    <aside class="sidebar" id="sidebar" hidden>
+      <div>
+        <div class="sidebar-section-label">Overview</div>
+        <div class="nav-item active" id="navOverview" data-view="overview">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          Overview
+        </div>
+        <div class="nav-item" id="navCustomers" data-view="customers" hidden>
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="8" r="3"/><path d="M3.5 19c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5"/><circle cx="17" cy="8" r="2.3"/><path d="M15.5 13.6c2.6.3 4.5 2.5 4.5 5.4"/></svg>
+          Customers
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <div class="sidebar-section-label" id="vehiclesLabel">Vehicles</div>
+        <div class="vehicle-list" id="vehicleList"></div>
+        <button class="add-vehicle-tile" id="addVehicleTile" hidden>+ Add a vehicle</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="main-inner" id="mainInner"></div>
+    </main>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal-card" id="modalCard"></div>
+</div>
+
+<script>
+function showFatalBanner(text, color){
+  var bar = document.createElement('div');
+  bar.textContent = text;
+  bar.style.cssText = 'position:fixed;top:0;left:0;right:0;background:'+(color||'#E5484D')+';color:#fff;padding:10px 16px;font:13px/1.4 sans-serif;text-align:center;z-index:9999;';
+  document.body.appendChild(bar);
+  return bar;
+}
+
+function earlyLang(){
+  try{
+    var s = localStorage.getItem('pitlane_lang');
+    if(s === 'fr' || s === 'ar') return s;
+  }catch(e){}
+  return 'en';
+}
+var EARLY_STRINGS = {
+  en: {
+    fileWarning: "This file is open directly from your computer (file://). Firebase often can't sign in or connect reliably that way — serve it from a real web server instead (see the chat for options) if things don't work below.",
+    scriptError: "Something went wrong ({msg}). Try reloading the page — if it keeps happening, re-download the file, and if you opened this file directly (file://), try serving it from a local web server instead.",
+    libraryLoadError: "Could not load the database library (firebase-bundle.js). Make sure that file is saved in the same folder as this page and reload. ({msg})"
+  },
+  fr: {
+    fileWarning: "Ce fichier est ouvert directement depuis votre ordinateur (file://). Firebase ne fonctionne souvent pas de manière fiable ainsi — servez-le plutôt depuis un vrai serveur web si ça ne marche pas ci-dessous.",
+    scriptError: "Un problème est survenu ({msg}). Essayez de recharger la page — si le problème persiste, retéléchargez le fichier, et si vous l'avez ouvert directement (file://), essayez de le servir depuis un serveur web local.",
+    libraryLoadError: "Impossible de charger la bibliothèque de base de données (firebase-bundle.js). Vérifiez que ce fichier est enregistré dans le même dossier que cette page, puis rechargez. ({msg})"
+  },
+  ar: {
+    fileWarning: "هذا الملف مفتوح مباشرة من جهاز الكمبيوتر الخاص بك (file://). غالبًا لا يعمل Firebase بشكل موثوق بهذه الطريقة — استخدم خادم ويب حقيقي بدلاً من ذلك إذا لم تعمل الأمور أدناه.",
+    scriptError: "حدث خطأ ما ({msg}). حاول إعادة تحميل الصفحة — إذا استمرت المشكلة، أعد تنزيل الملف، وإذا فتحته مباشرة (file://)، جرّب تشغيله من خادم ويب محلي.",
+    libraryLoadError: "تعذر تحميل مكتبة قاعدة البيانات (firebase-bundle.js). تأكد من حفظ هذا الملف في نفس مجلد هذه الصفحة ثم أعد التحميل. ({msg})"
+  }
+};
+function earlyT(key, msg){
+  var dict = EARLY_STRINGS[earlyLang()] || EARLY_STRINGS.en;
+  return (dict[key] || EARLY_STRINGS.en[key]).split('{msg}').join(msg||'');
+}
+document.documentElement.lang = earlyLang();
+document.documentElement.dir = earlyLang() === 'ar' ? 'rtl' : 'ltr';
+
+if(window.location.protocol === 'file:'){
+  showFatalBanner(earlyT('fileWarning'), '#163459');
+}
+
+window.addEventListener('error', function(e){
+  showFatalBanner(earlyT('scriptError', e.message||'script error'));
+});
+window.addEventListener('unhandledrejection', function(e){
+  var msg = (e.reason && e.reason.message) ? e.reason.message : String(e.reason);
+  showFatalBanner(earlyT('scriptError', msg));
+});
+
+(async function(){
+
+  var fbAppMod, fbFirestoreMod, fbAuthMod;
+  try{
+    fbAppMod = await import("./firebase-bundle.js");
+    fbFirestoreMod = fbAppMod;
+    fbAuthMod = fbAppMod;
+  }catch(loadErr){
+    var loadBar = document.createElement('div');
+    loadBar.textContent = earlyT('libraryLoadError', loadErr && loadErr.message ? loadErr.message : loadErr);
+    loadBar.style.cssText = "position:fixed;top:0;left:0;right:0;background:#E5484D;color:#fff;padding:10px 16px;font:13px/1.4 sans-serif;text-align:center;z-index:9999;";
+    document.body.appendChild(loadBar);
+    return;
+  }
+  var initializeApp = fbAppMod.initializeApp;
+  var getFirestore = fbFirestoreMod.getFirestore;
+  var collection = fbFirestoreMod.collection;
+  var doc = fbFirestoreMod.doc;
+  var addDoc = fbFirestoreMod.addDoc;
+  var updateDoc = fbFirestoreMod.updateDoc;
+  var deleteDoc = fbFirestoreMod.deleteDoc;
+  var setDoc = fbFirestoreMod.setDoc;
+  var onSnapshot = fbFirestoreMod.onSnapshot;
+  var query = fbFirestoreMod.query;
+  var where = fbFirestoreMod.where;
+  var getDocs = fbFirestoreMod.getDocs;
+  var writeBatch = fbFirestoreMod.writeBatch;
+  var getAuth = fbAuthMod.getAuth;
+  var onAuthStateChanged = fbAuthMod.onAuthStateChanged;
+  var signInWithEmailAndPassword = fbAuthMod.signInWithEmailAndPassword;
+  var createUserWithEmailAndPassword = fbAuthMod.createUserWithEmailAndPassword;
+  var signOut = fbAuthMod.signOut;
+
+  /* ============ Constants ============ */
+  var SERVICE_TYPES = [
+    {key:"oil_change", label:"Oil & filter change", km:8000, days:180},
+    {key:"tire_rotation", label:"Tire rotation", km:10000, days:180},
+    {key:"brake_inspection", label:"Brake inspection", km:20000, days:365},
+    {key:"brake_fluid", label:"Brake fluid flush", km:40000, days:730},
+    {key:"air_filter", label:"Air filter replacement", km:20000, days:365},
+    {key:"fuel_filter", label:"Fuel filter change", km:30000, days:730},
+    {key:"cabin_filter", label:"Cabin air filter", km:20000, days:365},
+    {key:"battery_check", label:"Battery check", km:20000, days:365},
+    {key:"coolant_flush", label:"Coolant flush", km:50000, days:730},
+    {key:"transmission_fluid", label:"Transmission fluid", km:50000, days:730},
+    {key:"spark_plugs", label:"Spark plugs", km:50000, days:730},
+    {key:"timing_belt", label:"Timing belt", km:100000, days:1825},
+    {key:"wheel_alignment", label:"Wheel alignment", km:10000, days:365},
+    {key:"ac_service", label:"A/C service", km:20000, days:730},
+    {key:"wiper_blades", label:"Wiper blades", km:20000, days:365},
+    {key:"custom", label:"Other / custom", km:8000, days:180}
+  ];
+  function typeLabel(key){
+    var found = SERVICE_TYPES.find(function(s){return s.key===key;});
+    if(!found) return key;
+    return t('svc_'+key);
+  }
+  function typeDefaults(key){
+    var found = SERVICE_TYPES.find(function(s){return s.key===key;});
+    return found ? {km:found.km, days:found.days} : {km:8000, days:180};
+  }
+
+  /* ============ Translations ============ */
+  var TRANSLATIONS = {
+    en: {
+      navOverview: "Overview", navCustomers: "Customers",
+      vehiclesLabelAdmin: "Vehicles", vehiclesLabelCustomer: "Your vehicles",
+      addVehicleTile: "+ Add a vehicle",
+      settingsBtn: "Station settings", exportBtn: "Export data", addVehicleBtn: "+ Add vehicle", signOutBtn: "Sign out",
+      dbConnected: "Database: connected", dbConnecting: "Database: connecting…", dbNotConnected: "Database: not connected",
+      roleOwner: "Owner", roleCustomer: "Customer",
+      brandTagDefault: "Service Log", stationNameDefault: "Your Station Name",
+      fileWarning: "This file is open directly from your computer (file://). Firebase often can't sign in or connect reliably that way — serve it from a real web server instead if things don't work below.",
+      scriptErrorPrefix: "Something went wrong",
+      scriptErrorSuffix: "Try reloading the page — if it keeps happening, re-download the file, and if you opened this file directly (file://), try serving it from a local web server instead.",
+      libraryLoadError: "Could not load the database library (firebase-bundle.js). Make sure that file is saved in the same folder as this page and reload.",
+
+      setupTitle: "Connect your database",
+      setupDesc: "This tracker stores every customer vehicle and service record in your own Firestore database, so your team and customers can access it securely. Connect it once to get started.",
+      setupConnectBtn: "Connect database",
+
+      authSignIn: "Sign in", authCreateAccount: "Create account",
+      authSubSignin: "Station owner or returning customer — sign in with your email.",
+      authSubSignup: "New here — set a password for your account.",
+      authEmail: "Email", authPassword: "Password",
+      authEnterBoth: "Enter both an email and a password.",
+      authForgotPassword: "Forgot password?",
+      authResetSent: "A password reset email has been sent to your inbox.",
+      authResetMissingEmail: "Enter your email address first, then click Forgot password.",
+      authHint: "First time as the station owner? Create an account — the very first account created becomes the administrator.<br>Customer? Create an account using the exact email the station registered your vehicle under.",
+
+      overviewTitleAdmin: "Garage overview", overviewTitleCustomer: "Your vehicles",
+      noVehiclesAdminTitle: "No vehicles yet",
+      noVehiclesAdminDesc: "Add your first customer vehicle to start logging oil changes, tire rotations, and everything else that keeps it running.",
+      noVehiclesCustomerTitle: "No vehicles on file",
+      noVehiclesCustomerDesc: "The station hasn't linked a vehicle to your email yet. Ask them to add it using the email you signed up with.",
+      addVehicleCta: "+ Add a vehicle",
+      statOverdue: "Overdue", statDueSoon: "Due soon", statVehicles: "Vehicles", statLoggedServices: "Logged services",
+      attentionNeeded: "Attention needed",
+      nothingDueSoon: "Nothing due soon — every logged service is on track.",
+      vehicleWord: "vehicle", vehiclesWord: "vehicles",
+
+      customersTitle: "Customers",
+      customerWord: "customer", customersWord: "customers", onFile: "on file",
+      noCustomersTitle: "No customers yet",
+      noCustomersDesc: "Customers appear here automatically once you add a vehicle with their email attached.",
+      noLoginEmail: "No login email on file",
+      editBtn: "Edit", revokeAccessBtn: "Revoke access",
+
+      editVehicleBtn: "Edit vehicle", removeBtn: "Remove",
+      noCustomerOnFile: "No customer on file",
+      nextUp: "Next up", noServicesLoggedYet: "No services logged yet",
+      currentMileage: "Current mileage", newReading: "New reading", updateBtn: "Update",
+      serviceStatus: "Service status",
+      lastLabel: "Last", nextDueLabel: "Next due", notLoggedForVehicle: "Not logged yet for this vehicle",
+      maintenanceHistory: "Maintenance history", allTypes: "All types", searchNotesPlaceholder: "Search notes",
+      logMaintenanceBtn: "+ Log maintenance",
+      colDate: "Date", colMileage: "Mileage", colType: "Type", colNotes: "Notes",
+      noMatchingAdmin: "No matching records. Log your first maintenance entry above.",
+      noMatchingCustomer: "No matching records yet.",
+      deleteBtn: "Delete", deleteConfirmRecord: "Delete this maintenance record?", cancelBtn: "Cancel",
+
+      statusOverdue: "Overdue", statusDueSoon: "Due soon", statusOnTrack: "On track", statusNotLogged: "Not logged",
+
+      svc_oil_change: "Oil & filter change", svc_tire_rotation: "Tire rotation",
+      svc_brake_inspection: "Brake inspection", svc_brake_fluid: "Brake fluid flush",
+      svc_air_filter: "Air filter replacement", svc_fuel_filter: "Fuel filter change",
+      svc_cabin_filter: "Cabin air filter", svc_battery_check: "Battery check",
+      svc_coolant_flush: "Coolant flush", svc_transmission_fluid: "Transmission fluid",
+      svc_spark_plugs: "Spark plugs", svc_timing_belt: "Timing belt",
+      svc_wheel_alignment: "Wheel alignment", svc_ac_service: "A/C service",
+      svc_wiper_blades: "Wiper blades", svc_custom: "Other / custom", customWord: "Custom",
+
+      addVehicleTitle: "Add a customer vehicle", addVehicleSub: "The basics — you can fine-tune it later.",
+      editVehicleTitle: "Edit vehicle",
+      customerName: "Customer name", customerEmailLabel: "Customer email (for their login)",
+      customerPhoneLabel: "Customer phone (optional)", vehicleLabel: "Vehicle label",
+      yearLabel: "Year", makeLabel: "Make", modelLabel: "Model", plateLabel: "Plate",
+      currentMileageKm: "Current mileage (km)", addVehicleSubmit: "Add vehicle", saveChanges: "Save changes",
+      vehicleFormErr: "Please fill in the customer name, vehicle label, and current mileage.",
+      saveDbErr: "Could not save to the database:", saveErr: "Could not save:",
+
+      removeVehicleTitle: "Remove {name}?",
+      removeVehicleSub: "This deletes the vehicle and all {n} logged maintenance record(s). This can't be undone.",
+      removeVehicleBtn: "Remove vehicle", deleteErr: "Could not delete:",
+
+      editCustomerTitle: "Edit customer",
+      editCustomerSub: "Updates apply to all {n} vehicle(s) linked to this customer.",
+      emailChangeHint: "Changing the email moves their login access to the new address — they'll need to sign up or sign in with it.",
+      enterCustomerName: "Please enter a customer name.",
+
+      revokeTitle: "Revoke access for {name}?",
+      revokeSub: "This removes their login access to {n} vehicle(s) — service history is kept, they just won't be able to sign in and view it anymore. This does not delete their account itself; if they still have login credentials, they could sign in but would see no vehicles.",
+      revokeAccessConfirmBtn: "Revoke access", revokeErr: "Could not revoke access:",
+
+      logMaintenanceTitle: "Log maintenance", editRecordTitle: "Edit record", forVehicle: "For",
+      serviceTypeLabel: "Service type", customLabelLabel: "Custom label", customLabelPlaceholder: "e.g. Cabin filter",
+      datePerformed: "Date performed", mileageAtServiceKm: "Mileage at service (km)",
+      remindAfterKm: "Remind again after (km)", remindAgainAfter: "Remind again after",
+      daysUnit: "days", monthsUnit: "months",
+      guessFromPace: "Guess from driving pace",
+      whicheverFirstHint: "Whichever comes first — km or time — will trigger the reminder.",
+      notesLabel: "Notes", notesPlaceholder: "Shop, parts used, anything worth remembering",
+      saveRecordBtn: "Save record", mileageAtServiceErr: "Please enter the mileage at time of service.",
+      guessFromHistory: "from this vehicle's own history",
+      guessFallback: "a typical average (not enough history yet for this vehicle)",
+      kmPerDay: "km/day",
+
+      stationSettingsTitle: "Station settings", stationSettingsSub: "Shown in the header of this tracker.",
+      stationNameLabel: "Station name", tagDeptLabel: "Tag / department", stationPhoneLabel: "Station phone (optional)",
+      saveBtn: "Save",
+      administratorsTitle: "Administrators",
+      administratorsDesc: "People who can sign in here as station owner instead of customer. This only controls what they can see in this app — to fully remove someone's ability to log in at all, delete their account in the Firebase console.",
+      youTag: "(you)", lastAdminCantRemove: "Last administrator — can't remove",
+      addAdminEmailPlaceholder: "email@example.com", addBtn: "Add",
+      enterEmailAddress: "Enter an email address.", alreadyAdmin: "Already an administrator.",
+      couldNotAdd: "Could not add:", cantRemoveLastAdmin: "Can't remove the last administrator.",
+      confirmRemoveAdmin: "Remove {email} as an administrator?", couldNotRemove: "Could not remove:",
+
+      connectFirestoreTitle: "Connect Firestore", connectedStatus: "Connected", notConnectedStatus: "Not connected",
+      firestoreSetupIntro: "One-time setup, in the",
+      firestoreConsole: "Firebase console",
+      firestoreStep1: "Create a project, then <b>Build → Firestore Database → Create database</b>.",
+      firestoreStep2: "<b>Build → Authentication → Sign-in method</b> → enable <b>Email/Password</b>.",
+      firestoreStep3: "<b>Project settings → General → Your apps</b> → add a Web app → copy the <code>firebaseConfig</code> object and paste it below.",
+      firestoreStep4: "In Firestore <b>Rules</b>, use rules that check <code>request.auth.token.email</code> against an admin list in <code>settings/station</code>, and let customers read only vehicles/records tied to their own email. Ask your developer, or use the Firebase Rules Playground to test.",
+      firebaseConfigLabel: "Firebase config (paste the object)",
+      pasteConfigErr: "Paste your Firebase config object first.",
+      badConfigErr: "Couldn't read that config — make sure you pasted the whole object, e.g. { apiKey: \"...\", ... }",
+      incompleteConfigErr: "That doesn't look like a complete Firebase config — it needs at least apiKey and projectId.",
+      disconnectBtn: "Disconnect", reconnectBtn: "Reconnect", connectBtn: "Connect"
+    },
+    fr: {
+      navOverview: "Aperçu", navCustomers: "Clients",
+      vehiclesLabelAdmin: "Véhicules", vehiclesLabelCustomer: "Vos véhicules",
+      addVehicleTile: "+ Ajouter un véhicule",
+      settingsBtn: "Paramètres de la station", exportBtn: "Exporter les données", addVehicleBtn: "+ Ajouter un véhicule", signOutBtn: "Se déconnecter",
+      dbConnected: "Base de données : connectée", dbConnecting: "Base de données : connexion…", dbNotConnected: "Base de données : non connectée",
+      roleOwner: "Propriétaire", roleCustomer: "Client",
+      brandTagDefault: "Journal de service", stationNameDefault: "Nom de votre station",
+      fileWarning: "Ce fichier est ouvert directement depuis votre ordinateur (file://). Firebase ne fonctionne souvent pas de manière fiable ainsi — servez-le plutôt depuis un vrai serveur web si ça ne marche pas ci-dessous.",
+      scriptErrorPrefix: "Un problème est survenu",
+      scriptErrorSuffix: "Essayez de recharger la page — si le problème persiste, retéléchargez le fichier, et si vous l'avez ouvert directement (file://), essayez de le servir depuis un serveur web local.",
+      libraryLoadError: "Impossible de charger la bibliothèque de base de données (firebase-bundle.js). Vérifiez que ce fichier est enregistré dans le même dossier que cette page, puis rechargez.",
+
+      setupTitle: "Connectez votre base de données",
+      setupDesc: "Ce suivi stocke chaque véhicule client et chaque intervention dans votre propre base de données Firestore, afin que votre équipe et vos clients puissent y accéder en toute sécurité. Connectez-la une seule fois pour commencer.",
+      setupConnectBtn: "Connecter la base de données",
+
+      authSignIn: "Se connecter", authCreateAccount: "Créer un compte",
+      authSubSignin: "Propriétaire de la station ou client déjà inscrit — connectez-vous avec votre e-mail.",
+      authSubSignup: "Nouveau ici — définissez un mot de passe pour votre compte.",
+      authEmail: "E-mail", authPassword: "Mot de passe",
+      authEnterBoth: "Saisissez un e-mail et un mot de passe.",
+      authHint: "Première fois en tant que propriétaire de la station ? Créez un compte — le tout premier compte créé devient l'administrateur.<br>Client ? Créez un compte avec l'e-mail exact utilisé par la station pour enregistrer votre véhicule.",
+
+      overviewTitleAdmin: "Aperçu du garage", overviewTitleCustomer: "Vos véhicules",
+      noVehiclesAdminTitle: "Aucun véhicule pour l'instant",
+      noVehiclesAdminDesc: "Ajoutez votre premier véhicule client pour commencer à enregistrer les vidanges, permutations de pneus et tout ce qui le maintient en marche.",
+      noVehiclesCustomerTitle: "Aucun véhicule enregistré",
+      noVehiclesCustomerDesc: "La station n'a pas encore lié de véhicule à votre e-mail. Demandez-leur de l'ajouter avec l'e-mail que vous avez utilisé pour vous inscrire.",
+      addVehicleCta: "+ Ajouter un véhicule",
+      statOverdue: "En retard", statDueSoon: "Bientôt échue", statVehicles: "Véhicules", statLoggedServices: "Interventions enregistrées",
+      attentionNeeded: "Attention requise",
+      nothingDueSoon: "Rien à prévoir bientôt — toutes les interventions enregistrées sont à jour.",
+      vehicleWord: "véhicule", vehiclesWord: "véhicules",
+
+      customersTitle: "Clients",
+      customerWord: "client", customersWord: "clients", onFile: "enregistré(s)",
+      noCustomersTitle: "Aucun client pour l'instant",
+      noCustomersDesc: "Les clients apparaissent ici automatiquement dès que vous ajoutez un véhicule avec leur e-mail associé.",
+      noLoginEmail: "Aucun e-mail de connexion enregistré",
+      editBtn: "Modifier", revokeAccessBtn: "Révoquer l'accès",
+
+      editVehicleBtn: "Modifier le véhicule", removeBtn: "Supprimer",
+      noCustomerOnFile: "Aucun client enregistré",
+      nextUp: "Prochaine étape", noServicesLoggedYet: "Aucune intervention enregistrée",
+      currentMileage: "Kilométrage actuel", newReading: "Nouveau relevé", updateBtn: "Mettre à jour",
+      serviceStatus: "État des interventions",
+      lastLabel: "Dernière", nextDueLabel: "Prochaine échéance", notLoggedForVehicle: "Pas encore enregistré pour ce véhicule",
+      maintenanceHistory: "Historique d'entretien", allTypes: "Tous les types", searchNotesPlaceholder: "Rechercher dans les notes",
+      logMaintenanceBtn: "+ Enregistrer une intervention",
+      colDate: "Date", colMileage: "Kilométrage", colType: "Type", colNotes: "Notes",
+      noMatchingAdmin: "Aucun enregistrement correspondant. Enregistrez votre première intervention ci-dessus.",
+      noMatchingCustomer: "Aucun enregistrement pour l'instant.",
+      deleteBtn: "Supprimer", deleteConfirmRecord: "Supprimer cette intervention ?", cancelBtn: "Annuler",
+
+      statusOverdue: "En retard", statusDueSoon: "Bientôt échu", statusOnTrack: "À jour", statusNotLogged: "Non enregistré",
+
+      svc_oil_change: "Vidange et changement de filtre", svc_tire_rotation: "Permutation des pneus",
+      svc_brake_inspection: "Contrôle des freins", svc_brake_fluid: "Purge du liquide de frein",
+      svc_air_filter: "Remplacement du filtre à air", svc_fuel_filter: "Changement du filtre à carburant",
+      svc_cabin_filter: "Filtre d'habitacle", svc_battery_check: "Contrôle de la batterie",
+      svc_coolant_flush: "Purge du liquide de refroidissement", svc_transmission_fluid: "Liquide de transmission",
+      svc_spark_plugs: "Bougies d'allumage", svc_timing_belt: "Courroie de distribution",
+      svc_wheel_alignment: "Parallélisme des roues", svc_ac_service: "Entretien de la climatisation",
+      svc_wiper_blades: "Balais d'essuie-glace", svc_custom: "Autre / personnalisé", customWord: "Personnalisé",
+
+      addVehicleTitle: "Ajouter un véhicule client", addVehicleSub: "L'essentiel — vous pourrez ajuster plus tard.",
+      editVehicleTitle: "Modifier le véhicule",
+      customerName: "Nom du client", customerEmailLabel: "E-mail du client (pour sa connexion)",
+      customerPhoneLabel: "Téléphone du client (facultatif)", vehicleLabel: "Libellé du véhicule",
+      yearLabel: "Année", makeLabel: "Marque", modelLabel: "Modèle", plateLabel: "Plaque",
+      currentMileageKm: "Kilométrage actuel (km)", addVehicleSubmit: "Ajouter le véhicule", saveChanges: "Enregistrer les modifications",
+      vehicleFormErr: "Veuillez renseigner le nom du client, le libellé du véhicule et le kilométrage actuel.",
+      saveDbErr: "Impossible d'enregistrer dans la base de données :", saveErr: "Impossible d'enregistrer :",
+
+      removeVehicleTitle: "Supprimer {name} ?",
+      removeVehicleSub: "Cela supprime le véhicule et les {n} intervention(s) enregistrée(s). Cette action est irréversible.",
+      removeVehicleBtn: "Supprimer le véhicule", deleteErr: "Impossible de supprimer :",
+
+      editCustomerTitle: "Modifier le client",
+      editCustomerSub: "Les modifications s'appliquent aux {n} véhicule(s) lié(s) à ce client.",
+      emailChangeHint: "Modifier l'e-mail transfère leur accès de connexion vers la nouvelle adresse — ils devront s'inscrire ou se connecter avec celle-ci.",
+      enterCustomerName: "Veuillez saisir un nom de client.",
+
+      revokeTitle: "Révoquer l'accès de {name} ?",
+      revokeSub: "Cela supprime leur accès de connexion à {n} véhicule(s) — l'historique d'entretien est conservé, ils ne pourront simplement plus se connecter pour le consulter. Cela ne supprime pas leur compte ; s'ils ont toujours leurs identifiants, ils pourront se connecter mais ne verront aucun véhicule.",
+      revokeAccessConfirmBtn: "Révoquer l'accès", revokeErr: "Impossible de révoquer l'accès :",
+
+      logMaintenanceTitle: "Enregistrer une intervention", editRecordTitle: "Modifier l'intervention", forVehicle: "Pour",
+      serviceTypeLabel: "Type d'intervention", customLabelLabel: "Libellé personnalisé", customLabelPlaceholder: "p. ex. Filtre d'habitacle",
+      datePerformed: "Date d'intervention", mileageAtServiceKm: "Kilométrage lors de l'intervention (km)",
+      remindAfterKm: "Rappeler après (km)", remindAgainAfter: "Rappeler après",
+      daysUnit: "jours", monthsUnit: "mois",
+      guessFromPace: "Estimer selon le rythme de conduite",
+      whicheverFirstHint: "Le premier des deux critères atteint — kilométrage ou durée — déclenchera le rappel.",
+      notesLabel: "Notes", notesPlaceholder: "Atelier, pièces utilisées, tout ce qui mérite d'être noté",
+      saveRecordBtn: "Enregistrer l'intervention", mileageAtServiceErr: "Veuillez saisir le kilométrage au moment de l'intervention.",
+      guessFromHistory: "d'après l'historique de ce véhicule",
+      guessFallback: "une moyenne habituelle (historique insuffisant pour ce véhicule)",
+      kmPerDay: "km/jour",
+
+      stationSettingsTitle: "Paramètres de la station", stationSettingsSub: "Affiché dans l'en-tête de ce suivi.",
+      stationNameLabel: "Nom de la station", tagDeptLabel: "Étiquette / service", stationPhoneLabel: "Téléphone de la station (facultatif)",
+      saveBtn: "Enregistrer",
+      administratorsTitle: "Administrateurs",
+      administratorsDesc: "Personnes pouvant se connecter ici en tant que propriétaire de la station plutôt que client. Cela ne contrôle que ce qu'elles peuvent voir dans cette application — pour supprimer totalement la possibilité de connexion de quelqu'un, supprimez son compte dans la console Firebase.",
+      youTag: "(vous)", lastAdminCantRemove: "Dernier administrateur — impossible de supprimer",
+      addAdminEmailPlaceholder: "email@example.com", addBtn: "Ajouter",
+      enterEmailAddress: "Saisissez une adresse e-mail.", alreadyAdmin: "Déjà administrateur.",
+      couldNotAdd: "Impossible d'ajouter :", cantRemoveLastAdmin: "Impossible de supprimer le dernier administrateur.",
+      confirmRemoveAdmin: "Supprimer {email} en tant qu'administrateur ?", couldNotRemove: "Impossible de supprimer :",
+
+      connectFirestoreTitle: "Connecter Firestore", connectedStatus: "Connecté", notConnectedStatus: "Non connecté",
+      firestoreSetupIntro: "Configuration unique, dans la",
+      firestoreConsole: "console Firebase",
+      firestoreStep1: "Créez un projet, puis <b>Build → Firestore Database → Create database</b>.",
+      firestoreStep2: "<b>Build → Authentication → Sign-in method</b> → activez <b>Email/Password</b>.",
+      firestoreStep3: "<b>Project settings → General → Your apps</b> → ajoutez une application Web → copiez l'objet <code>firebaseConfig</code> et collez-le ci-dessous.",
+      firestoreStep4: "Dans les règles <b>Rules</b> de Firestore, utilisez des règles qui vérifient <code>request.auth.token.email</code> par rapport à une liste d'administrateurs dans <code>settings/station</code>, et permettent aux clients de ne lire que les véhicules/enregistrements liés à leur propre e-mail. Demandez à votre développeur, ou utilisez le Rules Playground de Firebase pour tester.",
+      firebaseConfigLabel: "Configuration Firebase (collez l'objet)",
+      pasteConfigErr: "Collez d'abord votre objet de configuration Firebase.",
+      badConfigErr: "Impossible de lire cette configuration — assurez-vous d'avoir collé l'objet complet, par ex. { apiKey: \"...\", ... }",
+      incompleteConfigErr: "Cela ne ressemble pas à une configuration Firebase complète — il faut au moins apiKey et projectId.",
+      disconnectBtn: "Déconnecter", reconnectBtn: "Reconnecter", connectBtn: "Connecter"
+    },
+    ar: {
+      navOverview: "نظرة عامة", navCustomers: "العملاء",
+      vehiclesLabelAdmin: "المركبات", vehiclesLabelCustomer: "مركباتك",
+      addVehicleTile: "+ إضافة مركبة",
+      settingsBtn: "إعدادات المحطة", exportBtn: "تصدير البيانات", addVehicleBtn: "+ إضافة مركبة", signOutBtn: "تسجيل الخروج",
+      dbConnected: "قاعدة البيانات: متصلة", dbConnecting: "قاعدة البيانات: جارٍ الاتصال…", dbNotConnected: "قاعدة البيانات: غير متصلة",
+      roleOwner: "المالك", roleCustomer: "عميل",
+      brandTagDefault: "سجل الصيانة", stationNameDefault: "اسم محطتك",
+      fileWarning: "هذا الملف مفتوح مباشرة من جهاز الكمبيوتر الخاص بك (file://). غالبًا لا يعمل Firebase بشكل موثوق بهذه الطريقة — استخدم خادم ويب حقيقي بدلاً من ذلك إذا لم تعمل الأمور أدناه.",
+      scriptErrorPrefix: "حدث خطأ ما",
+      scriptErrorSuffix: "حاول إعادة تحميل الصفحة — إذا استمرت المشكلة، أعد تنزيل الملف، وإذا فتحته مباشرة (file://)، جرّب تشغيله من خادم ويب محلي.",
+      libraryLoadError: "تعذر تحميل مكتبة قاعدة البيانات (firebase-bundle.js). تأكد من حفظ هذا الملف في نفس مجلد هذه الصفحة ثم أعد التحميل.",
+
+      setupTitle: "اتصل بقاعدة بياناتك",
+      setupDesc: "يقوم هذا النظام بتخزين كل مركبة عميل وكل سجل صيانة في قاعدة بيانات Firestore الخاصة بك، حتى يتمكن فريقك وعملاؤك من الوصول إليها بأمان. قم بالاتصال مرة واحدة للبدء.",
+      setupConnectBtn: "اتصال بقاعدة البيانات",
+
+      authSignIn: "تسجيل الدخول", authCreateAccount: "إنشاء حساب",
+      authSubSignin: "مالك المحطة أو عميل عائد — سجّل الدخول بواسطة بريدك الإلكتروني.",
+      authSubSignup: "جديد هنا — عيّن كلمة مرور لحسابك.",
+      authEmail: "البريد الإلكتروني", authPassword: "كلمة المرور",
+      authEnterBoth: "أدخل البريد الإلكتروني وكلمة المرور.",
+      authHint: "أول مرة كمالك للمحطة؟ أنشئ حسابًا — أول حساب يتم إنشاؤه يصبح هو المسؤول.<br>عميل؟ أنشئ حسابًا بنفس البريد الإلكتروني الذي سجّلت به المحطة مركبتك.",
+
+      overviewTitleAdmin: "نظرة عامة على المرآب", overviewTitleCustomer: "مركباتك",
+      noVehiclesAdminTitle: "لا توجد مركبات بعد",
+      noVehiclesAdminDesc: "أضف أول مركبة لعميل لتبدأ بتسجيل تغييرات الزيت وتدوير الإطارات وكل ما يبقيها تعمل.",
+      noVehiclesCustomerTitle: "لا توجد مركبات مسجلة",
+      noVehiclesCustomerDesc: "لم تقم المحطة بربط مركبة ببريدك الإلكتروني بعد. اطلب منهم إضافتها باستخدام البريد الإلكتروني الذي سجّلت به.",
+      addVehicleCta: "+ إضافة مركبة",
+      statOverdue: "متأخرة", statDueSoon: "مستحقة قريبًا", statVehicles: "المركبات", statLoggedServices: "الصيانات المسجلة",
+      attentionNeeded: "يتطلب انتباه",
+      nothingDueSoon: "لا يوجد شيء مستحق قريبًا — جميع الصيانات المسجلة على المسار الصحيح.",
+      vehicleWord: "مركبة", vehiclesWord: "مركبات",
+
+      customersTitle: "العملاء",
+      customerWord: "عميل", customersWord: "عملاء", onFile: "مسجل",
+      noCustomersTitle: "لا يوجد عملاء بعد",
+      noCustomersDesc: "يظهر العملاء هنا تلقائيًا بمجرد إضافة مركبة مرتبطة ببريدهم الإلكتروني.",
+      noLoginEmail: "لا يوجد بريد إلكتروني لتسجيل الدخول مسجل",
+      editBtn: "تعديل", revokeAccessBtn: "إلغاء الوصول",
+
+      editVehicleBtn: "تعديل المركبة", removeBtn: "إزالة",
+      noCustomerOnFile: "لا يوجد عميل مسجل",
+      nextUp: "التالي", noServicesLoggedYet: "لم يتم تسجيل أي صيانة بعد",
+      currentMileage: "المسافة الحالية", newReading: "قراءة جديدة", updateBtn: "تحديث",
+      serviceStatus: "حالة الصيانة",
+      lastLabel: "آخر", nextDueLabel: "الاستحقاق التالي", notLoggedForVehicle: "لم يتم تسجيله لهذه المركبة بعد",
+      maintenanceHistory: "سجل الصيانة", allTypes: "كل الأنواع", searchNotesPlaceholder: "البحث في الملاحظات",
+      logMaintenanceBtn: "+ تسجيل صيانة",
+      colDate: "التاريخ", colMileage: "المسافة", colType: "النوع", colNotes: "ملاحظات",
+      noMatchingAdmin: "لا توجد سجلات مطابقة. سجّل أول صيانة أعلاه.",
+      noMatchingCustomer: "لا توجد سجلات مطابقة بعد.",
+      deleteBtn: "حذف", deleteConfirmRecord: "هل تريد حذف سجل الصيانة هذا؟", cancelBtn: "إلغاء",
+
+      statusOverdue: "متأخر", statusDueSoon: "مستحق قريبًا", statusOnTrack: "على المسار الصحيح", statusNotLogged: "غير مسجل",
+
+      svc_oil_change: "تغيير الزيت والفلتر", svc_tire_rotation: "تدوير الإطارات",
+      svc_brake_inspection: "فحص الفرامل", svc_brake_fluid: "تغيير سائل الفرامل",
+      svc_air_filter: "استبدال فلتر الهواء", svc_fuel_filter: "تغيير فلتر الوقود",
+      svc_cabin_filter: "فلتر مقصورة الهواء", svc_battery_check: "فحص البطارية",
+      svc_coolant_flush: "تغيير سائل التبريد", svc_transmission_fluid: "زيت ناقل الحركة",
+      svc_spark_plugs: "شمعات الإشعال", svc_timing_belt: "سير التوقيت",
+      svc_wheel_alignment: "ضبط زوايا العجلات", svc_ac_service: "صيانة المكيف",
+      svc_wiper_blades: "مساحات الزجاج", svc_custom: "أخرى / مخصص", customWord: "مخصص",
+
+      addVehicleTitle: "إضافة مركبة عميل", addVehicleSub: "الأساسيات — يمكنك التعديل لاحقًا.",
+      editVehicleTitle: "تعديل المركبة",
+      customerName: "اسم العميل", customerEmailLabel: "البريد الإلكتروني للعميل (لتسجيل دخوله)",
+      customerPhoneLabel: "هاتف العميل (اختياري)", vehicleLabel: "تسمية المركبة",
+      yearLabel: "السنة", makeLabel: "الصانع", modelLabel: "الطراز", plateLabel: "رقم اللوحة",
+      currentMileageKm: "المسافة الحالية (كم)", addVehicleSubmit: "إضافة المركبة", saveChanges: "حفظ التغييرات",
+      vehicleFormErr: "يرجى إدخال اسم العميل وتسمية المركبة والمسافة الحالية.",
+      saveDbErr: "تعذر الحفظ في قاعدة البيانات:", saveErr: "تعذر الحفظ:",
+
+      removeVehicleTitle: "إزالة {name}؟",
+      removeVehicleSub: "سيؤدي هذا إلى حذف المركبة وجميع سجلات الصيانة البالغ عددها {n}. لا يمكن التراجع عن هذا الإجراء.",
+      removeVehicleBtn: "إزالة المركبة", deleteErr: "تعذر الحذف:",
+
+      editCustomerTitle: "تعديل العميل",
+      editCustomerSub: "تنطبق التحديثات على جميع المركبات المرتبطة بهذا العميل وعددها {n}.",
+      emailChangeHint: "تغيير البريد الإلكتروني ينقل صلاحية تسجيل الدخول إلى العنوان الجديد — سيحتاجون إلى التسجيل أو تسجيل الدخول به.",
+      enterCustomerName: "يرجى إدخال اسم العميل.",
+
+      revokeTitle: "إلغاء وصول {name}؟",
+      revokeSub: "سيؤدي هذا إلى إزالة صلاحية تسجيل دخولهم إلى {n} مركبة — يتم الاحتفاظ بسجل الصيانة، لكنهم لن يتمكنوا بعد الآن من تسجيل الدخول لعرضه. هذا لا يحذف حسابهم؛ إذا كانت لديهم بيانات الدخول، يمكنهم تسجيل الدخول لكن لن يروا أي مركبات.",
+      revokeAccessConfirmBtn: "إلغاء الوصول", revokeErr: "تعذر إلغاء الوصول:",
+
+      logMaintenanceTitle: "تسجيل صيانة", editRecordTitle: "تعديل السجل", forVehicle: "لـ",
+      serviceTypeLabel: "نوع الصيانة", customLabelLabel: "تسمية مخصصة", customLabelPlaceholder: "مثال: فلتر المقصورة",
+      datePerformed: "تاريخ التنفيذ", mileageAtServiceKm: "المسافة عند الصيانة (كم)",
+      remindAfterKm: "التذكير بعد (كم)", remindAgainAfter: "التذكير بعد",
+      daysUnit: "أيام", monthsUnit: "أشهر",
+      guessFromPace: "تقدير حسب وتيرة القيادة",
+      whicheverFirstHint: "أيهما يأتي أولاً — المسافة أو الوقت — سيُفعّل التذكير.",
+      notesLabel: "ملاحظات", notesPlaceholder: "الورشة، القطع المستخدمة، أي شيء يستحق التذكر",
+      saveRecordBtn: "حفظ السجل", mileageAtServiceErr: "يرجى إدخال المسافة وقت الصيانة.",
+      guessFromHistory: "من سجل هذه المركبة",
+      guessFallback: "متوسط نموذجي (لا يوجد سجل كافٍ لهذه المركبة بعد)",
+      kmPerDay: "كم/يوم",
+
+      stationSettingsTitle: "إعدادات المحطة", stationSettingsSub: "يظهر في أعلى هذا النظام.",
+      stationNameLabel: "اسم المحطة", tagDeptLabel: "الوسم / القسم", stationPhoneLabel: "هاتف المحطة (اختياري)",
+      saveBtn: "حفظ",
+      administratorsTitle: "المسؤولون",
+      administratorsDesc: "الأشخاص الذين يمكنهم تسجيل الدخول هنا كمالك للمحطة بدلاً من عميل. هذا يتحكم فقط فيما يمكنهم رؤيته في هذا التطبيق — لإزالة قدرة شخص على تسجيل الدخول نهائيًا، احذف حسابه من وحدة تحكم Firebase.",
+      youTag: "(أنت)", lastAdminCantRemove: "آخر مسؤول — لا يمكن إزالته",
+      addAdminEmailPlaceholder: "email@example.com", addBtn: "إضافة",
+      enterEmailAddress: "أدخل عنوان بريد إلكتروني.", alreadyAdmin: "مسؤول بالفعل.",
+      couldNotAdd: "تعذرت الإضافة:", cantRemoveLastAdmin: "لا يمكن إزالة آخر مسؤول.",
+      confirmRemoveAdmin: "هل تريد إزالة {email} كمسؤول؟", couldNotRemove: "تعذرت الإزالة:",
+
+      connectFirestoreTitle: "الاتصال بـ Firestore", connectedStatus: "متصل", notConnectedStatus: "غير متصل",
+      firestoreSetupIntro: "إعداد لمرة واحدة، في",
+      firestoreConsole: "وحدة تحكم Firebase",
+      firestoreStep1: "أنشئ مشروعًا، ثم <b>Build → Firestore Database → Create database</b>.",
+      firestoreStep2: "<b>Build → Authentication → Sign-in method</b> ← فعّل <b>Email/Password</b>.",
+      firestoreStep3: "<b>Project settings → General → Your apps</b> ← أضف تطبيق ويب ← انسخ كائن <code>firebaseConfig</code> والصقه أدناه.",
+      firestoreStep4: "في <b>Rules</b> الخاصة بـ Firestore، استخدم قواعد تتحقق من <code>request.auth.token.email</code> مقابل قائمة المسؤولين في <code>settings/station</code>، واسمح للعملاء بقراءة المركبات/السجلات المرتبطة ببريدهم الإلكتروني فقط. اسأل مطورك، أو استخدم Rules Playground الخاص بـ Firebase للاختبار.",
+      firebaseConfigLabel: "إعدادات Firebase (الصق الكائن)",
+      pasteConfigErr: "الصق كائن إعدادات Firebase أولاً.",
+      badConfigErr: "تعذّرت قراءة هذا الإعداد — تأكد من لصق الكائن كاملاً، مثل { apiKey: \"...\", ... }",
+      incompleteConfigErr: "هذا لا يبدو كإعداد Firebase كامل — يحتاج على الأقل إلى apiKey و projectId.",
+      disconnectBtn: "قطع الاتصال", reconnectBtn: "إعادة الاتصال", connectBtn: "اتصال"
+    }
+  };
+
+  function loadLang(){
+    try{
+      var s = localStorage.getItem('pitlane_lang');
+      if(s && TRANSLATIONS[s]) return s;
+    }catch(e){}
+    return 'en';
+  }
+  function saveLang(lang){
+    try{ localStorage.setItem('pitlane_lang', lang); }catch(e){}
+  }
+  function loadSavedSettings(){
+    try{
+      var saved = localStorage.getItem('pitlane_station_settings');
+      if(saved){
+        var parsed = JSON.parse(saved);
+        if(parsed && typeof parsed === 'object'){ return Object.assign({stationName:"Your Station Name", tagline:"Service Log", phone:""}, parsed); }
+      }
+    }catch(e){}
+    return {stationName:"Your Station Name", tagline:"Service Log", phone:""};
+  }
+  function saveSavedSettings(settings){
+    try{
+      localStorage.setItem('pitlane_station_settings', JSON.stringify(settings || {}));
+    }catch(e){}
+  }
+  function t(key, vars){
+    var dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
+    var str = dict[key] != null ? dict[key] : (TRANSLATIONS.en[key] != null ? TRANSLATIONS.en[key] : key);
+    if(vars){
+      Object.keys(vars).forEach(function(k){
+        str = str.split('{'+k+'}').join(vars[k]);
+      });
+    }
+    return str;
+  }
+  function localeCode(){
+    return state.lang === 'ar' ? 'ar-u-nu-latn' : (state.lang === 'fr' ? 'fr' : 'en');
+  }
+
+  /* ============ State ============ */
+  var state = {
+    lang: loadLang(),
+    vehicles: [],
+    records: [],
+    settings: loadSavedSettings(),
+    selectedVehicleId: null,
+    view: "overview",
+    dbConnected: false,
+    dbConnecting: false,
+    user: null,
+    role: null,          // 'admin' | 'customer' | null
+    subscribedRole: null // tracks which role's listeners are currently active
+  };
+
+  var app=null, db=null, auth=null, activeFirebaseApiKey=null;
+  var unsubVehicles=null, unsubRecords=null, unsubSettings=null;
+
+  // Pre-filled for this station — connects automatically on first load.
+  // If you ever disconnect via the Database button, this won't auto-reconnect
+  // until you paste a config again (so "Disconnect" actually stays disconnected).
+  var DEFAULT_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyBItEdFo7B_Ntku4-kYf2hRe7PoaY8ps5I",
+    authDomain: "tracking-services-car.firebaseapp.com",
+    projectId: "tracking-services-car",
+    storageBucket: "tracking-services-car.firebasestorage.app",
+    messagingSenderId: "329918900657",
+    appId: "1:329918900657:web:7e03ef230d7429c4107590"
+  };
+
+  /* ============ Firebase config storage (local only — just the connection info) ============ */
+  function loadFirebaseConfig(){
+    try{
+      var s = localStorage.getItem('pitlane_firebase_config');
+      if(s) return JSON.parse(s);
+    }catch(e){}
+    var optedOut = false;
+    try{ optedOut = localStorage.getItem('pitlane_no_autoconnect') === '1'; }catch(e){}
+    return optedOut ? null : DEFAULT_FIREBASE_CONFIG;
+  }
+  function saveFirebaseConfigLocal(cfg){
+    try{
+      localStorage.setItem('pitlane_firebase_config', JSON.stringify(cfg));
+      localStorage.removeItem('pitlane_no_autoconnect');
+    }catch(e){}
+  }
+  function clearFirebaseConfigLocal(){
+    try{
+      localStorage.removeItem('pitlane_firebase_config');
+      localStorage.setItem('pitlane_no_autoconnect', '1');
+    }catch(e){}
+  }
+
+  /* ============ Date helpers ============ */
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  function fmtDate(iso){
+    if(!iso) return "—";
+    var d = new Date(iso+"T00:00:00");
+    return d.toLocaleDateString(localeCode(),{year:'numeric',month:'short',day:'numeric'});
+  }
+  function addDays(iso, days){
+    var d = new Date(iso+"T00:00:00");
+    d.setDate(d.getDate()+days);
+    return d.toISOString().slice(0,10);
+  }
+  function daysBetween(isoA, isoB){
+    var a = new Date(isoA+"T00:00:00"), b = new Date(isoB+"T00:00:00");
+    return Math.round((b-a)/86400000);
+  }
+  function fmtInterval(days){
+    if(!days) return "—";
+    if(days % 30 === 0 && days >= 60) return (days/30)+" months";
+    if(days === 1) return "1 day";
+    return days+" days";
+  }
+
+  /* ============ Domain logic ============ */
+  function vehicleRecords(vehicleId){
+    return state.records.filter(function(r){return r.vehicleId===vehicleId;})
+      .sort(function(a,b){
+        if(a.date !== b.date) return b.date.localeCompare(a.date); // most recent date first
+        return b.mileage - a.mileage; // same-day tiebreaker
+      });
+  }
+
+  // Estimate this vehicle's average km/day from its own service history.
+  // Falls back to a typical average if there isn't enough history yet.
+  function estimateKmPerDay(vehicleId){
+    var recs = state.records.filter(function(r){return r.vehicleId===vehicleId;})
+      .slice().sort(function(a,b){ return a.date.localeCompare(b.date); });
+    if(recs.length >= 2){
+      var first = recs[0], last = recs[recs.length-1];
+      var days = daysBetween(first.date, last.date);
+      var kmDelta = last.mileage - first.mileage;
+      if(days > 0 && kmDelta > 0){
+        return {kmPerDay: kmDelta/days, source:"history"};
+      }
+    }
+    return {kmPerDay: 35, source:"fallback"}; // ~12,800 km/year, a typical average
+  }
+
+  function estimateIntervalDays(vehicleId, kmInterval){
+    var est = estimateKmPerDay(vehicleId);
+    var days = Math.max(1, Math.round(kmInterval / est.kmPerDay));
+    return {days: days, kmPerDay: est.kmPerDay, source: est.source};
+  }
+
+  function serviceEntriesForVehicle(vehicle){
+    var entries = SERVICE_TYPES.filter(function(st){return st.key!=="custom";}).map(function(st){
+      return {key:st.key, label:typeLabel(st.key), isCustom:false};
+    });
+    var customLabels = Array.from(new Set(
+      state.records.filter(function(r){return r.vehicleId===vehicle.id && r.typeKey==="custom";})
+        .map(function(r){return r.customLabel || t('customWord');})
+    ));
+    customLabels.forEach(function(label){
+      entries.push({key:"custom", label:label, isCustom:true});
+    });
+    return entries.map(function(e){
+      var recsForEntry = vehicleRecords(vehicle.id).filter(function(r){
+        if(e.isCustom) return r.typeKey==="custom" && (r.customLabel||t('customWord'))===e.label;
+        return r.typeKey===e.key;
+      });
+      var status = "none", fraction=0, last=null, dueKm=null, dueDate=null;
+      if(recsForEntry.length){
+        last = recsForEntry[0];
+        var dueK = last.mileage + last.intervalKm;
+        var dueD = last.intervalDays ? addDays(last.date, last.intervalDays) : null;
+        var mf = last.intervalKm>0 ? (vehicle.currentMileage-last.mileage)/last.intervalKm : 0;
+        var df = 0;
+        if(dueD){
+          var span = daysBetween(last.date, dueD) || 1;
+          var elapsed = daysBetween(last.date, todayISO());
+          df = elapsed/span;
+        }
+        if(intervalUsesKmOnly(last)){
+          fraction = mf;
+        } else {
+          fraction = Math.max(mf, df);
+        }
+        status = fraction>=1 ? "overdue" : (fraction>=0.85 ? "soon" : "ok");
+        dueKm = dueK; dueDate = dueD;
+      }
+      return {key:e.key, label:e.label, isCustom:e.isCustom, status:status, fraction:Math.max(0,Math.min(fraction,1.4)), lastRecord:last, dueKm:dueKm, dueDate:dueDate};
+    }).sort(function(a,b){ return b.fraction - a.fraction; });
+  }
+
+  function garageAlerts(){
+    var alerts = [];
+    state.vehicles.forEach(function(v){
+      serviceEntriesForVehicle(v).forEach(function(e){
+        if(e.status==="overdue" || e.status==="soon"){
+          alerts.push({vehicle:v, entry:e});
+        }
+      });
+    });
+    alerts.sort(function(a,b){ return b.entry.fraction - a.entry.fraction; });
+    return alerts;
+  }
+
+  // Groups vehicles by the customer they're registered to. There's no
+  // separate "customers" collection — a customer is just whoever a
+  // vehicle's customerEmail points at — so this derives the list live.
+  function customersFromVehicles(){
+    var groups = {};
+    var order = [];
+    state.vehicles.forEach(function(v){
+      var email = (v.customerEmail||'').toLowerCase().trim();
+      var key = email || ('__unlinked__' + v.id);
+      if(!groups[key]){
+        groups[key] = {
+          email: email,
+          name: v.customerName || (email ? email : "No customer linked"),
+          phone: v.customerPhone || "",
+          vehicles: [],
+          linked: !!email
+        };
+        order.push(key);
+      }
+      groups[key].vehicles.push(v);
+      // Prefer the most recently-seen non-empty name/phone across their vehicles.
+      if(v.customerName) groups[key].name = v.customerName;
+      if(v.customerPhone) groups[key].phone = v.customerPhone;
+    });
+    return order.map(function(k){ return groups[k]; })
+      .sort(function(a,b){ return a.name.localeCompare(b.name); });
+  }
+
+  /* ============ SVG Gauge ============ */
+  function polar(cx,cy,r,angleDeg){
+    var rad = angleDeg*Math.PI/180;
+    return {x: cx + r*Math.cos(rad), y: cy - r*Math.sin(rad)};
+  }
+  function arcPath(cx,cy,r,startAngle,endAngle){
+    var s = polar(cx,cy,r,startAngle);
+    var e = polar(cx,cy,r,endAngle);
+    var largeArc = (startAngle-endAngle) > 180 ? 1 : 0;
+    return "M "+s.x+" "+s.y+" A "+r+" "+r+" 0 "+largeArc+" 1 "+e.x+" "+e.y;
+  }
+  function renderGauge(fraction, statusColorVar){
+    fraction = Math.max(0, Math.min(fraction, 1));
+    var cx=130, cy=118, r=96, strokeBg=14;
+    var needleAngle = 180 - fraction*180;
+    var needleR = r-20;
+    var tip = polar(cx,cy,needleR,needleAngle);
+    var base1 = polar(cx,cy,7,needleAngle+90);
+    var base2 = polar(cx,cy,7,needleAngle-90);
+
+    var segs = [
+      {from:180, to:180-0.6*180, color:"var(--green)"},
+      {from:180-0.6*180, to:180-0.85*180, color:"var(--amber)"},
+      {from:180-0.85*180, to:0, color:"var(--red)"}
+    ];
+    var segMarkup = segs.map(function(s){
+      return '<path d="'+arcPath(cx,cy,r,s.from,s.to)+'" stroke="'+s.color+'" stroke-width="'+strokeBg+'" fill="none" stroke-linecap="butt" opacity="0.9"/>';
+    }).join("");
+
+    var ticks = [];
+    for(var i=0;i<=8;i++){
+      var a = 180 - (i/8)*180;
+      var p1 = polar(cx,cy,r+10,a);
+      var p2 = polar(cx,cy,r+2,a);
+      ticks.push('<line x1="'+p1.x+'" y1="'+p1.y+'" x2="'+p2.x+'" y2="'+p2.y+'" stroke="#C7D3E2" stroke-width="1.5" opacity="0.8"/>');
+    }
+
+    return '<svg viewBox="0 0 260 150" width="100%" height="auto">'
+      + '<path d="'+arcPath(cx,cy,r,180,0)+'" stroke="#EEF2F7" stroke-width="'+(strokeBg+6)+'" fill="none"/>'
+      + segMarkup
+      + ticks.join("")
+      + '<line x1="'+base1.x+'" y1="'+base1.y+'" x2="'+tip.x+'" y2="'+tip.y+'" stroke="'+statusColorVar+'" stroke-width="4" stroke-linecap="round"/>'
+      + '<line x1="'+base2.x+'" y1="'+base2.y+'" x2="'+tip.x+'" y2="'+tip.y+'" stroke="'+statusColorVar+'" stroke-width="4" stroke-linecap="round"/>'
+      + '<circle cx="'+cx+'" cy="'+cy+'" r="9" fill="'+statusColorVar+'"/>'
+      + '<circle cx="'+cx+'" cy="'+cy+'" r="4" fill="var(--ink)"/>'
+      + '</svg>';
+  }
+
+  function statusColorVar(status){
+    if(status==="overdue") return "var(--red)";
+    if(status==="soon") return "var(--amber)";
+    if(status==="ok") return "var(--green)";
+    return "var(--chalk-faint)";
+  }
+  function statusBadgeClass(status){
+    if(status==="overdue") return "badge-overdue";
+    if(status==="soon") return "badge-soon";
+    if(status==="ok") return "badge-ok";
+    return "badge-none";
+  }
+  function statusDotClass(status){
+    if(status==="overdue") return "dot-red";
+    if(status==="soon") return "dot-amber";
+    if(status==="ok") return "dot-green";
+    return "dot-gray";
+  }
+  function statusText(status){
+    if(status==="overdue") return t('statusOverdue');
+    if(status==="soon") return t('statusDueSoon');
+    if(status==="ok") return t('statusOnTrack');
+    return t('statusNotLogged');
+  }
+
+  function vehicleOverallStatus(vehicle){
+    var entries = serviceEntriesForVehicle(vehicle).filter(function(e){return e.status!=="none";});
+    if(entries.some(function(e){return e.status==="overdue";})) return "red";
+    if(entries.some(function(e){return e.status==="soon";})) return "amber";
+    if(entries.length) return "green";
+    return "gray";
+  }
+
+  function isAdmin(){ return state.role === "admin"; }
+
+  /* ============ Rendering ============ */
+  function el(html){
+    var tpl = document.createElement('template');
+    tpl.innerHTML = html.trim();
+    return tpl.content.firstElementChild;
+  }
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function renderDbStatus(){
+    var dot = document.getElementById('dbStatusDot');
+    var text = document.getElementById('dbStatusText');
+    dot.className = 'status-dot ' + (state.dbConnected ? 'dot-green' : (state.dbConnecting ? 'dot-amber' : 'dot-gray'));
+    text.textContent = state.dbConnected ? t('dbConnected') : (state.dbConnecting ? t('dbConnecting') : t('dbNotConnected'));
+  }
+
+  function renderBrand(){
+    document.getElementById('brandName').textContent = state.settings.stationName || t('stationNameDefault');
+    document.getElementById('brandTag').textContent = state.settings.tagline || t('brandTagDefault');
+  }
+
+  function renderStaticText(){
+    document.getElementById('settingsBtn').textContent = t('settingsBtn');
+    document.getElementById('exportBtn').textContent = t('exportBtn');
+    document.getElementById('addVehicleBtn').textContent = t('addVehicleBtn');
+    document.getElementById('signOutBtn').textContent = t('signOutBtn');
+    document.getElementById('addVehicleTile').textContent = t('addVehicleTile');
+    document.getElementById('navOverview').lastChild.textContent = ' ' + t('navOverview');
+    document.getElementById('navCustomers').lastChild.textContent = ' ' + t('navCustomers');
+    document.querySelectorAll('#langSwitch button').forEach(function(btn){
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === state.lang);
+    });
+  }
+
+  function renderChrome(){
+    var loggedIn = !!state.user && !!state.role;
+    document.getElementById('settingsBtn').hidden = !isAdmin();
+    document.getElementById('exportBtn').hidden = !loggedIn;
+    document.getElementById('addVehicleBtn').hidden = !isAdmin();
+    document.getElementById('signOutBtn').hidden = !state.user;
+    document.getElementById('sidebar').hidden = !loggedIn;
+    document.getElementById('addVehicleTile').hidden = !isAdmin();
+    document.getElementById('navCustomers').hidden = !isAdmin();
+    document.getElementById('vehiclesLabel').textContent = isAdmin() ? t('vehiclesLabelAdmin') : t('vehiclesLabelCustomer');
+    var roleTag = document.getElementById('roleTag');
+    if(loggedIn){
+      roleTag.hidden = false;
+      roleTag.textContent = isAdmin() ? t('roleOwner') : t('roleCustomer');
+    } else {
+      roleTag.hidden = true;
+    }
+  }
+
+  function renderSidebar(){
+    var list = document.getElementById('vehicleList');
+    list.innerHTML = "";
+    state.vehicles.forEach(function(v){
+      var st = vehicleOverallStatus(v);
+      var item = el(
+        '<div class="vehicle-item '+(state.view==="vehicle"&&state.selectedVehicleId===v.id?"active":"")+'" data-id="'+v.id+'">'+
+          '<div class="vehicle-item-main">'+
+            '<div class="vehicle-item-name">'+escapeHtml(v.name)+'</div>'+
+            '<div class="vehicle-item-sub">'+(isAdmin() ? escapeHtml(v.customerName||"")+(v.customerName?" · ":"") : "")+v.currentMileage.toLocaleString()+' km</div>'+
+          '</div>'+
+          '<span class="status-dot dot-'+st+'"></span>'+
+        '</div>'
+      );
+      item.addEventListener('click', function(){
+        state.view = "vehicle";
+        state.selectedVehicleId = v.id;
+        render();
+      });
+      list.appendChild(item);
+    });
+    document.getElementById('navOverview').classList.toggle('active', state.view==="overview");
+    document.getElementById('navCustomers').classList.toggle('active', state.view==="customers");
+  }
+
+  function render(){
+    renderDbStatus();
+    renderBrand();
+    renderChrome();
+    renderStaticText();
+    var main = document.getElementById('mainInner');
+    main.innerHTML = "";
+
+    if(!state.dbConnected){
+      main.appendChild(renderSetupPrompt());
+      return;
+    }
+    if(!state.user || !state.role){
+      main.appendChild(renderAuthScreen());
+      return;
+    }
+
+    renderSidebar();
+    if(state.view === "customers" && isAdmin()){
+      main.appendChild(renderCustomers());
+    } else if(state.view === "overview" || !state.vehicles.length){
+      main.appendChild(renderOverview());
+    } else {
+      var v = state.vehicles.find(function(x){return x.id===state.selectedVehicleId;});
+      if(!v){ main.appendChild(renderOverview()); return; }
+      main.appendChild(renderVehicleView(v));
+    }
+  }
+
+  function renderSetupPrompt(){
+    var wrap = el(
+      '<div class="empty-state">'+
+        '<svg width="52" height="52" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#9FB4CE" stroke-width="1.4"/><path d="M12 8v5" stroke="#9FB4CE" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="16" r="0.9" fill="#9FB4CE"/></svg>'+
+        '<h2>'+t('setupTitle')+'</h2>'+
+        '<p>'+t('setupDesc')+'</p>'+
+      '</div>'
+    );
+    var btn = el('<button class="btn btn-primary">'+t('setupConnectBtn')+'</button>');
+    btn.addEventListener('click', openFirestoreModal);
+    wrap.appendChild(btn);
+    return wrap;
+  }
+
+  function renderAuthScreen(){
+    var wrap = el('<div class="auth-wrap"></div>');
+    var card = el(
+      '<div class="auth-card">'+
+        '<div class="auth-brand">'+
+          '<span class="auth-brand-mark">'+
+            '<svg viewBox="0 0 24 24" width="24" height="24" fill="none">'+
+              '<path d="M4 15.5 L6 9 C6.4 7.8 7.5 7 8.8 7 H15.2 C16.5 7 17.6 7.8 18 9 L20 15.5" stroke="#F3801E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'+
+              '<rect x="3.2" y="15" width="17.6" height="4.6" rx="1.4" fill="none" stroke="#F3801E" stroke-width="1.6"/>'+
+              '<circle cx="7" cy="19.6" r="1.4" fill="#F3801E"/>'+
+              '<circle cx="17" cy="19.6" r="1.4" fill="#F3801E"/>'+
+              '<line x1="6" y1="11.5" x2="18" y2="11.5" stroke="#F3801E" stroke-width="1.2"/>'+
+            '</svg>'+
+          '</span>'+ 
+          '<span class="auth-brand-name">'+escapeHtml(state.settings.stationName || t('stationNameDefault'))+'</span>'+
+          '<span class="auth-brand-tag">'+escapeHtml(state.settings.tagline || t('brandTagDefault'))+'</span>'+
+        '</div>'+
+        '<h2 id="authTitle">'+t('authSignIn')+'</h2>'+
+        '<div class="sub" id="authSub">'+t('authSubSignin')+'</div>'+
+        '<div class="auth-toggle">'+
+          '<button type="button" class="active" id="tabSignIn">'+t('authSignIn')+'</button>'+
+          '<button type="button" id="tabSignUp">'+t('authCreateAccount')+'</button>'+
+        '</div>'+
+        '<div class="modal-error" id="authError"></div>'+
+        '<form id="authForm">'+
+          '<div class="field"><label>'+t('authEmail')+'</label><input id="a_email" type="email" placeholder="you@example.com"></div>'+
+          '<div class="field"><label>'+t('authPassword')+'</label><input id="a_password" type="password" placeholder="••••••••"></div>'+
+          '<button type="submit" class="btn btn-primary btn-block" id="authSubmit">'+t('authSignIn')+'</button>'+
+        '</form>'+
+        '<div style="margin-top:12px; text-align:right;">'+
+          '<button type="button" class="btn btn-ghost btn-sm" id="authForgotBtn" style="padding:0; border:none; background:none; color:var(--amber);">'+t('authForgotPassword')+'</button>'+
+        '</div>'+
+        '<div class="hint" style="margin-top:16px;line-height:1.6;">'+
+          t('authHint')+
+        '</div>'+
+      '</div>'
+    );
+    wrap.appendChild(card);
+
+    setTimeout(function(){
+      var formEl = document.getElementById('authForm');
+      if(!formEl || formEl.dataset.wired) return;
+      formEl.dataset.wired = '1';
+
+      var mode = "signin";
+      var title = document.getElementById('authTitle');
+      var sub = document.getElementById('authSub');
+      var submitBtn = document.getElementById('authSubmit');
+      var forgotBtn = document.getElementById('authForgotBtn');
+      var tabIn = document.getElementById('tabSignIn');
+      var tabUp = document.getElementById('tabSignUp');
+      function setMode(m){
+        mode = m;
+        tabIn.classList.toggle('active', m==='signin');
+        tabUp.classList.toggle('active', m==='signup');
+        title.textContent = m==='signin' ? t('authSignIn') : t('authCreateAccount');
+        sub.textContent = m==='signin' ? t('authSubSignin') : t('authSubSignup');
+        submitBtn.textContent = m==='signin' ? t('authSignIn') : t('authCreateAccount');
+        forgotBtn.style.display = m==='signin' ? 'inline-block' : 'none';
+      }
+      tabIn.addEventListener('click', function(){ setMode('signin'); });
+      tabUp.addEventListener('click', function(){ setMode('signup'); });
+      forgotBtn.addEventListener('click', function(){
+        var emailEl = document.getElementById('a_email');
+        var errEl = document.getElementById('authError');
+        if(!emailEl || !errEl) return;
+        var email = emailEl.value.trim();
+        errEl.style.display = 'block';
+        if(!email){
+          errEl.style.color = 'var(--red)';
+          errEl.textContent = t('authResetMissingEmail');
+          return;
+        }
+        if(!activeFirebaseApiKey){
+          errEl.style.color = 'var(--red)';
+          errEl.textContent = 'Firebase auth is not ready yet. Please wait a moment and try again.';
+          return;
+        }
+        forgotBtn.disabled = true;
+        errEl.style.color = 'var(--green)';
+        errEl.textContent = '...';
+        restSendPasswordResetEmail(activeFirebaseApiKey, email).then(function(){
+          errEl.textContent = t('authResetSent');
+          errEl.style.color = 'var(--green)';
+        }).catch(function(err){
+          errEl.textContent = err.message;
+          errEl.style.color = 'var(--red)';
+        }).then(function(){
+          forgotBtn.disabled = false;
+        });
+      });
+
+      formEl.addEventListener('submit', function(e){
+        e.preventDefault();
+        var emailEl = document.getElementById('a_email');
+        var pwEl = document.getElementById('a_password');
+        var errEl = document.getElementById('authError');
+        if(!emailEl || !pwEl || !errEl) return;
+        var email = emailEl.value.trim();
+        var pw = pwEl.value;
+        errEl.style.display = 'none';
+        if(!email || !pw){
+          errEl.textContent = t('authEnterBoth');
+          errEl.style.display = 'block';
+          errEl.style.color = 'var(--red)';
+          return;
+        }
+        submitBtn.disabled = true;
+        var action = mode==='signin' ? signInWithEmailAndPassword(auth,email,pw) : createUserWithEmailAndPassword(auth,email,pw);
+        action.catch(function(err){
+          submitBtn.disabled = false;
+          errEl.textContent = err.message;
+          errEl.style.display = 'block';
+          errEl.style.color = 'var(--red)';
+        });
+      });
+      setMode('signin');
+    }, 0);
+
+    return wrap;
+  }
+
+  function renderOverview(){
+    var wrap = el('<div></div>');
+
+    if(!state.vehicles.length){
+      wrap.appendChild(el(
+        '<div class="empty-state">'+
+          '<svg width="52" height="52" viewBox="0 0 24 24" fill="none"><path d="M4 15.5 L6 9 C6.4 7.8 7.5 7 8.8 7 H15.2 C16.5 7 17.6 7.8 18 9 L20 15.5" stroke="#9FB4CE" stroke-width="1.4"/><rect x="3.2" y="15" width="17.6" height="4.6" rx="1.4" fill="none" stroke="#9FB4CE" stroke-width="1.4"/><circle cx="7" cy="19.6" r="1.3" fill="#9FB4CE"/><circle cx="17" cy="19.6" r="1.3" fill="#9FB4CE"/></svg>'+
+          '<h2>'+(isAdmin()?t('noVehiclesAdminTitle'):t('noVehiclesCustomerTitle'))+'</h2>'+
+          '<p>'+(isAdmin()?t('noVehiclesAdminDesc'):t('noVehiclesCustomerDesc'))+'</p>'+
+        '</div>'
+      ));
+      if(isAdmin()){
+        var btn = el('<button class="btn btn-primary">'+t('addVehicleCta')+'</button>');
+        btn.addEventListener('click', openAddVehicleModal);
+        wrap.appendChild(btn);
+      }
+      return wrap;
+    }
+
+    var alerts = garageAlerts();
+    var overdueCount = alerts.filter(function(a){return a.entry.status==="overdue";}).length;
+    var soonCount = alerts.filter(function(a){return a.entry.status==="soon";}).length;
+
+    wrap.appendChild(el(
+      '<div>'+
+        '<h1 style="font-family:var(--display);font-size:30px;margin:0 0 4px;">'+(isAdmin()?t('overviewTitleAdmin'):t('overviewTitleCustomer'))+'</h1>'+
+        '<div class="vehicle-sub">'+state.vehicles.length+' '+(state.vehicles.length===1?t('vehicleWord'):t('vehiclesWord'))+'</div>'+
+      '</div>'
+    ));
+
+    var stats = el(
+      '<div class="stat-row">'+
+        '<div class="stat-card stat-red"><div class="num">'+overdueCount+'</div><div class="lbl">'+t('statOverdue')+'</div></div>'+
+        '<div class="stat-card stat-amber"><div class="num">'+soonCount+'</div><div class="lbl">'+t('statDueSoon')+'</div></div>'+
+        '<div class="stat-card stat-green"><div class="num">'+state.vehicles.length+'</div><div class="lbl">'+t('statVehicles')+'</div></div>'+
+        '<div class="stat-card"><div class="num">'+state.records.length+'</div><div class="lbl">'+t('statLoggedServices')+'</div></div>'+
+      '</div>'
+    );
+    wrap.appendChild(stats);
+
+    var section = el('<div></div>');
+    section.appendChild(el('<h2 class="section-title" style="margin-top:8px;">'+t('attentionNeeded')+'</h2>'));
+    if(!alerts.length){
+      section.appendChild(el('<div class="hint" style="font-size:13px;">'+t('nothingDueSoon')+'</div>'));
+    } else {
+      var alertList = el('<div class="alert-list"></div>');
+      alerts.forEach(function(a){
+        var row = el(
+          '<div class="alert-row">'+
+            '<span class="status-dot '+statusDotClass(a.entry.status)+'"></span>'+
+            '<div class="alert-main">'+
+              '<div class="alert-veh">'+escapeHtml(a.vehicle.name)+'</div>'+
+              '<div class="alert-type">'+escapeHtml(a.entry.label)+'</div>'+
+            '</div>'+
+            '<div class="alert-when">'+(a.entry.dueKm ? a.entry.dueKm.toLocaleString()+' km · ' : "")+(a.entry.dueDate?fmtDate(a.entry.dueDate):"")+'</div>'+
+          '</div>'
+        );
+        row.addEventListener('click', function(){
+          state.view="vehicle"; state.selectedVehicleId=a.vehicle.id; render();
+        });
+        alertList.appendChild(row);
+      });
+      section.appendChild(alertList);
+    }
+    wrap.appendChild(section);
+
+    return wrap;
+  }
+
+  function renderCustomers(){
+    var wrap = el('<div></div>');
+    var customers = customersFromVehicles();
+
+    wrap.appendChild(el(
+      '<div>'+
+        '<h1 style="font-family:var(--display);font-size:30px;margin:0 0 4px;">'+t('customersTitle')+'</h1>'+
+        '<div class="vehicle-sub">'+customers.length+' '+(customers.length===1?t('customerWord'):t('customersWord'))+' '+t('onFile')+'</div>'+
+      '</div>'
+    ));
+
+    if(!customers.length){
+      wrap.appendChild(el(
+        '<div class="empty-state">'+
+          '<h2>'+t('noCustomersTitle')+'</h2>'+
+          '<p>'+t('noCustomersDesc')+'</p>'+
+        '</div>'
+      ));
+      return wrap;
+    }
+
+    var list = el('<div class="alert-list"></div>');
+    customers.forEach(function(c){
+      var vehicleNames = c.vehicles.map(function(v){ return escapeHtml(v.name); }).join(", ");
+      var row = el(
+        '<div class="alert-row" style="cursor:default;align-items:flex-start;">'+
+          '<span class="status-dot '+(c.linked ? 'dot-green' : 'dot-gray')+'" style="margin-top:5px;"></span>'+
+          '<div class="alert-main">'+
+            '<div class="alert-veh">'+escapeHtml(c.name)+'</div>'+
+            '<div class="alert-type">'+(c.email ? escapeHtml(c.email) : t('noLoginEmail'))+(c.phone ? ' · '+escapeHtml(c.phone) : '')+'</div>'+
+            '<div class="alert-type" style="margin-top:4px;color:var(--text-dark-faint);">'+vehicleNames+'</div>'+
+          '</div>'+
+          '<div style="display:flex;gap:6px;flex-shrink:0;">'+
+            '<button class="btn btn-sm btn-ghost" data-act="edit">'+t('editBtn')+'</button>'+
+            (c.linked ? '<button class="btn btn-sm btn-danger" data-act="revoke">'+t('revokeAccessBtn')+'</button>' : '')+
+          '</div>'+
+        '</div>'
+      );
+      row.querySelector('[data-act="edit"]').addEventListener('click', function(){ openEditCustomerModal(c); });
+      var revokeBtn = row.querySelector('[data-act="revoke"]');
+      if(revokeBtn) revokeBtn.addEventListener('click', function(){ openRevokeAccessConfirm(c); });
+      list.appendChild(row);
+    });
+    wrap.appendChild(list);
+
+    return wrap;
+  }
+
+  function renderVehicleView(v){
+    var wrap = el('<div></div>');
+    var recs = vehicleRecords(v.id);
+    var entries = serviceEntriesForVehicle(v);
+    var topEntry = entries[0];
+
+    var heading = el(
+      '<div class="vehicle-heading">'+
+        '<div>'+
+          '<h1>'+escapeHtml(v.name)+'</h1>'+
+          '<div class="vehicle-sub">'+[v.year, v.make, v.model].filter(Boolean).join(" · ")+(v.plate?" · "+v.plate.toUpperCase():"")+'</div>'+
+          (isAdmin() ? '<div class="vehicle-sub" style="margin-top:2px;">'+escapeHtml(v.customerName||t('noCustomerOnFile'))+(v.customerPhone?" · "+escapeHtml(v.customerPhone):"")+(v.customerEmail?" · "+escapeHtml(v.customerEmail):"")+'</div>' : '')+
+        '</div>'+
+        '<div class="vehicle-actions">'+
+          (isAdmin() ? '<button class="btn btn-sm btn-ghost" id="editVehicleBtn">'+t('editVehicleBtn')+'</button><button class="btn btn-sm btn-danger" id="deleteVehicleBtn">'+t('removeBtn')+'</button>' : '')+
+        '</div>'+
+      '</div>'
+    );
+    wrap.appendChild(heading);
+
+    var cluster = el('<section class="cluster-panel"></section>');
+    var clusterRow = el('<div class="cluster-row"></div>');
+
+    var gaugeWrap = el('<div class="gauge-wrap"></div>');
+    if(topEntry && topEntry.status!=="none"){
+      gaugeWrap.innerHTML = renderGauge(topEntry.fraction, statusColorVar(topEntry.status)) +
+        '<div class="gauge-caption"><div class="gc-title">'+t('nextUp')+' · '+escapeHtml(topEntry.label)+'</div>'+
+        '<div class="gc-value" style="color:'+statusColorVar(topEntry.status)+'">'+statusText(topEntry.status)+'</div></div>';
+    } else {
+      gaugeWrap.innerHTML = renderGauge(0, "var(--chalk-faint)") +
+        '<div class="gauge-caption"><div class="gc-title">'+t('noServicesLoggedYet')+'</div></div>';
+    }
+    clusterRow.appendChild(gaugeWrap);
+
+    var rawMiles = Math.max(0, Number(v.currentMileage) || 0);
+    var padded = String(rawMiles).padStart(6, '0');
+    var digits = padded.split("");
+    var odoHtml = digits.map(function(d){return '<div class="odo-digit">'+d+'</div>';}).join("");
+    var odoWrap = el(
+      '<div class="odometer-wrap">'+
+        '<div class="odometer-label">'+t('currentMileage')+'</div>'+
+        '<div style="display:flex;align-items:flex-end;gap:6px;">'+
+          '<div class="odometer">'+odoHtml+'</div><div class="odo-unit">km</div>'+
+        '</div>'+
+        '<form class="mileage-form" id="mileageForm"><input type="number" min="0" id="mileageInput" placeholder="'+t('newReading')+'"><button type="submit" class="btn btn-sm btn-primary">'+t('updateBtn')+'</button></form>'+
+      '</div>'
+    );
+    clusterRow.appendChild(odoWrap);
+    cluster.appendChild(clusterRow);
+    wrap.appendChild(cluster);
+
+    var remSection = el('<section></section>');
+    remSection.appendChild(el('<h2 class="section-title">'+t('serviceStatus')+'</h2>'));
+    var grid = el('<div class="reminder-grid"></div>');
+    entries.forEach(function(en){
+      var pct = Math.min(en.fraction,1)*100;
+      var barColor = statusColorVar(en.status);
+      var detail = en.lastRecord
+        ? t('lastLabel')+': '+en.lastRecord.mileage.toLocaleString()+' km · '+fmtDate(en.lastRecord.date)+'<br>'+t('nextDueLabel')+': '+(en.dueKm?en.dueKm.toLocaleString()+' km':'—')+' · '+fmtDate(en.dueDate)
+        : t('notLoggedForVehicle');
+      var card = el(
+        '<div class="reminder-card status-'+en.status+'">'+
+          '<div class="reminder-top">'+
+            '<div class="reminder-type">'+escapeHtml(en.label)+'</div>'+
+            '<span class="reminder-badge '+statusBadgeClass(en.status)+'">'+statusText(en.status)+'</span>'+
+          '</div>'+
+          '<div class="reminder-detail">'+detail+'</div>'+
+          (en.status!=="none" ? '<div class="reminder-bar"><div class="reminder-bar-fill" style="width:'+pct+'%;background:'+barColor+'"></div></div>' : '')+
+        '</div>'
+      );
+      grid.appendChild(card);
+    });
+    remSection.appendChild(grid);
+    wrap.appendChild(remSection);
+
+    var histSection = el('<section></section>');
+    var histHeader = el(
+      '<div class="history-header">'+
+        '<h2 class="section-title" style="margin:0;">'+t('maintenanceHistory')+'</h2>'+
+        '<div class="history-controls">'+
+          '<select id="filterType"><option value="">'+t('allTypes')+'</option>'+
+            SERVICE_TYPES.map(function(st){return '<option value="'+st.key+'">'+typeLabel(st.key)+'</option>';}).join("")+
+          '</select>'+
+          '<input type="search" id="searchNotes" placeholder="'+t('searchNotesPlaceholder')+'">'+
+          (isAdmin() ? '<button class="btn btn-sm btn-primary" id="addRecordBtn">'+t('logMaintenanceBtn')+'</button>' : '')+
+        '</div>'+
+      '</div>'
+    );
+    histSection.appendChild(histHeader);
+
+    var table = el(
+      '<div class="table-scroll">'+
+      '<table class="history-table">'+
+        '<thead><tr><th>'+t('colDate')+'</th><th>'+t('colMileage')+'</th><th>'+t('colType')+'</th><th>'+t('colNotes')+'</th><th></th></tr></thead>'+
+        '<tbody id="historyBody"></tbody>'+
+      '</table>'+
+      '</div>'
+    );
+    histSection.appendChild(table);
+    wrap.appendChild(histSection);
+
+    setTimeout(function(){
+      // A newer render() may have already replaced this DOM (e.g. a Firestore
+      // snapshot fired while this callback was queued) — bail out quietly.
+      // The wired-flag also stops duplicate listeners from stacking up if
+      // render() fired more than once before any of these callbacks ran.
+      var tbodyEl = document.getElementById('historyBody');
+      if(!tbodyEl || tbodyEl.dataset.wired) return;
+      tbodyEl.dataset.wired = '1';
+
+      renderHistoryBody(v, recs);
+
+      var filterEl = document.getElementById('filterType');
+      var searchEl = document.getElementById('searchNotes');
+      if(filterEl) filterEl.addEventListener('change', function(){ renderHistoryBody(v, recs); });
+      if(searchEl) searchEl.addEventListener('input', function(){ renderHistoryBody(v, recs); });
+
+      var addRecordBtn = document.getElementById('addRecordBtn');
+      if(addRecordBtn) addRecordBtn.addEventListener('click', function(){ openAddRecordModal(v); });
+
+      var mf = document.getElementById('mileageForm');
+      if(mf){
+        mf.addEventListener('submit', function(e){
+          e.preventDefault();
+          var input = document.getElementById('mileageInput');
+          if(!input) return;
+          var val = parseInt(input.value,10);
+          if(isNaN(val) || val<0) return;
+          fsUpdateVehicle(v.id, {currentMileage: val}).catch(function(err){ alertError('Could not update mileage', err); });
+        });
+      }
+      var editBtn = document.getElementById('editVehicleBtn');
+      if(editBtn) editBtn.addEventListener('click', function(){ openEditVehicleModal(v); });
+      var delBtn = document.getElementById('deleteVehicleBtn');
+      if(delBtn) delBtn.addEventListener('click', function(){ openConfirmDeleteVehicle(v); });
+    },0);
+
+    return wrap;
+  }
+
+  function renderHistoryBody(v, recs){
+    var tbody = document.getElementById('historyBody');
+    var filterEl = document.getElementById('filterType');
+    var searchEl = document.getElementById('searchNotes');
+    if(!tbody || !filterEl || !searchEl) return;
+    var typeFilter = filterEl.value;
+    var search = searchEl.value.trim().toLowerCase();
+    var filtered = recs.filter(function(r){
+      if(typeFilter && r.typeKey!==typeFilter) return false;
+      if(search && !(r.notes||"").toLowerCase().includes(search)) return false;
+      return true;
+    });
+    tbody.innerHTML = "";
+    if(!filtered.length){
+      tbody.appendChild(el('<tr class="empty-row"><td colspan="5">'+(isAdmin()?t('noMatchingAdmin'):t('noMatchingCustomer'))+'</td></tr>'));
+      return;
+    }
+    filtered.forEach(function(r){
+      var typeName = r.typeKey==="custom" ? (r.customLabel||t('customWord')) : typeLabel(r.typeKey);
+      var row = el(
+        '<tr>'+
+          '<td>'+fmtDate(r.date)+'</td>'+
+          '<td>'+r.mileage.toLocaleString()+' km</td>'+
+          '<td class="hist-type">'+escapeHtml(typeName)+'</td>'+
+          '<td class="hist-notes">'+escapeHtml(r.notes||"—")+'</td>'+
+          '<td class="row-actions-cell"><div class="hist-actions">'+
+            (isAdmin() ? '<button class="btn btn-sm btn-ghost" data-act="edit">'+t('editBtn')+'</button><button class="btn btn-sm btn-danger" data-act="del">'+t('deleteBtn')+'</button>' : '')+
+          '</div></td>'+
+        '</tr>'
+      );
+      if(isAdmin()){
+        row.querySelector('[data-act="edit"]').addEventListener('click', function(){ openEditRecordModal(v, r); });
+        row.querySelector('[data-act="del"]').addEventListener('click', function(){
+          if(confirm(t('deleteConfirmRecord'))){
+            fsDeleteRecord(r.id).catch(function(err){ alertError('Could not delete record', err); });
+          }
+        });
+      }
+      tbody.appendChild(row);
+    });
+  }
+
+  /* ============ Modals ============ */
+  function openModal(html, onMount, wide){
+    var overlay = document.getElementById('modalOverlay');
+    var card = document.getElementById('modalCard');
+    card.className = 'modal-card' + (wide ? ' wide' : '');
+    card.innerHTML = html;
+    overlay.hidden = false;
+    if(onMount) onMount(card);
+  }
+  function closeModal(){
+    document.getElementById('modalOverlay').hidden = true;
+    document.getElementById('modalCard').innerHTML = "";
+  }
+  document.getElementById('modalOverlay').addEventListener('click', function(e){
+    if(e.target.id === 'modalOverlay') closeModal();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape') closeModal();
+  });
+  function showModalError(card, msg){
+    var err = card.querySelector('#modalError');
+    if(!err) return;
+    err.textContent = msg;
+    err.style.display = "block";
+  }
+  function alertError(prefix, err){
+    var msg = (err && err.message) ? err.message : String(err);
+    var bar = document.createElement('div');
+    bar.textContent = prefix + ': ' + msg;
+    bar.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#E5484D;color:#fff;padding:10px 16px;font:13px/1.4 sans-serif;text-align:center;z-index:9999;';
+    document.body.appendChild(bar);
+    setTimeout(function(){ bar.remove(); }, 6000);
+  }
+
+  function intervalFieldHtml(defaultDays){
+    var display = intervalDaysToDisplay(defaultDays);
+    return (
+      '<div class="field"><label>'+t('remindAgainAfter')+'</label>'+
+      '<div class="interval-row">'+
+        '<input id="f_intervalAmount" type="number" min="0" value="'+display.amount+'">'+
+        '<select id="f_intervalUnit">'+
+          '<option value="days" '+(display.unit==='days'?'selected':'')+'>'+t('daysUnit')+'</option>'+
+          '<option value="months" '+(display.unit==='months'?'selected':'')+'>'+t('monthsUnit')+'</option>'+
+        '</select>'+
+      '</div></div>'
+    );
+  }
+  function intervalAmountToDays(amount, unit){
+    amount = parseInt(amount,10) || 0;
+    return unit === 'months' ? amount * 30 : amount;
+  }
+  function intervalDaysToDisplay(days){
+    days = parseInt(days,10) || 0;
+    if(days >= 60 && days % 30 === 0){
+      return {amount: Math.round(days / 30), unit: 'months'};
+    }
+    return {amount: days, unit: 'days'};
+  }
+  function readIntervalDays(card){
+    var amount = parseInt(card.querySelector('#f_intervalAmount').value,10) || 0;
+    var unit = card.querySelector('#f_intervalUnit').value;
+    return intervalAmountToDays(amount, unit);
+  }
+  function setIntervalFields(card, days){
+    var display = intervalDaysToDisplay(days);
+    card.querySelector('#f_intervalUnit').value = display.unit;
+    card.querySelector('#f_intervalAmount').value = display.amount;
+  }
+  function intervalUsesKmOnly(record){
+    if(!record) return false;
+    var intervalKm = Number(record.intervalKm) || 0;
+    var intervalDays = Number(record.intervalDays) || 0;
+    return intervalKm > 0 && intervalDays <= 0;
+  }
+  // Converts the on-screen number when the person switches the days/months
+  // dropdown themselves, so picking "months" doesn't just relabel the same
+  // raw number — it recalculates it to the equivalent duration.
+  function wireIntervalUnitToggle(card){
+    var unitSelect = card.querySelector('#f_intervalUnit');
+    var amountInput = card.querySelector('#f_intervalAmount');
+    var lastUnit = unitSelect.value;
+    unitSelect.addEventListener('change', function(){
+      var amount = parseInt(amountInput.value,10) || 0;
+      if(lastUnit === 'days' && unitSelect.value === 'months'){
+        amountInput.value = Math.max(1, Math.round(amount / 30));
+      } else if(lastUnit === 'months' && unitSelect.value === 'days'){
+        amountInput.value = Math.max(0, amount * 30);
+      }
+      lastUnit = unitSelect.value;
+    });
+  }
+
+  function openAddVehicleModal(){
+    if(!isAdmin()){ return; }
+    openModal(
+      '<h2 class="modal-title">'+t('addVehicleTitle')+'</h2>'+
+      '<div class="modal-sub">'+t('addVehicleSub')+'</div>'+
+      '<div class="modal-error" id="modalError"></div>'+
+      '<form id="vehicleForm">'+
+        '<div class="field"><label>'+t('customerName')+'</label><input id="f_customer" placeholder="e.g. John Miller"></div>'+
+        '<div class="field"><label>'+t('customerEmailLabel')+'</label><input id="f_customerEmail" type="email" placeholder="e.g. john@example.com"></div>'+
+        '<div class="field"><label>'+t('customerPhoneLabel')+'</label><input id="f_customerPhone" placeholder="e.g. (555) 010-4477"></div>'+
+        '<div class="field"><label>'+t('vehicleLabel')+'</label><input id="f_name" placeholder="e.g. Miller — Silver Corolla"></div>'+
+        '<div class="field-row">'+
+          '<div class="field"><label>'+t('yearLabel')+'</label><input id="f_year" type="number" placeholder="2019"></div>'+
+          '<div class="field"><label>'+t('makeLabel')+'</label><input id="f_make" placeholder="Toyota"></div>'+
+        '</div>'+
+        '<div class="field-row">'+
+          '<div class="field"><label>'+t('modelLabel')+'</label><input id="f_model" placeholder="Corolla"></div>'+
+          '<div class="field"><label>'+t('plateLabel')+'</label><input id="f_plate" placeholder="Optional"></div>'+
+        '</div>'+
+        '<div class="field"><label>'+t('currentMileageKm')+'</label><input id="f_mileage" type="number" min="0" placeholder="e.g. 68000"></div>'+
+        '<div class="modal-actions">'+
+          '<button type="button" class="btn btn-ghost" id="cancelBtn">'+t('cancelBtn')+'</button>'+
+          '<button type="submit" class="btn btn-primary">'+t('addVehicleSubmit')+'</button>'+
+        '</div>'+
+      '</form>',
+      function(card){
+        card.querySelector('#cancelBtn').addEventListener('click', closeModal);
+        card.querySelector('#vehicleForm').addEventListener('submit', function(e){
+          e.preventDefault();
+          var name = card.querySelector('#f_name').value.trim();
+          var customer = card.querySelector('#f_customer').value.trim();
+          var mileage = parseInt(card.querySelector('#f_mileage').value,10);
+          if(!name || !customer || isNaN(mileage)){
+            showModalError(card, t('vehicleFormErr'));
+            return;
+          }
+          var v = {
+            name: name,
+            customerName: customer,
+            customerEmail: card.querySelector('#f_customerEmail').value.trim().toLowerCase(),
+            customerPhone: card.querySelector('#f_customerPhone').value.trim(),
+            year: card.querySelector('#f_year').value.trim(),
+            make: card.querySelector('#f_make').value.trim(),
+            model: card.querySelector('#f_model').value.trim(),
+            plate: card.querySelector('#f_plate').value.trim(),
+            currentMileage: mileage
+          };
+          var submitBtn = card.querySelector('button[type="submit"]');
+          submitBtn.disabled = true;
+          fsAddVehicle(v).then(function(id){
+            state.view = "vehicle";
+            state.selectedVehicleId = id;
+            closeModal();
+            render();
+          }).catch(function(err){
+            submitBtn.disabled = false;
+            showModalError(card, t('saveDbErr') + " " + err.message);
+          });
+        });
+      }
+    );
+  }
+
+  function openEditVehicleModal(v){
+    openModal(
+      '<h2 class="modal-title">'+t('editVehicleTitle')+'</h2>'+
+      '<div class="modal-error" id="modalError"></div>'+
+      '<form id="vehicleForm">'+
+        '<div class="field"><label>'+t('customerName')+'</label><input id="f_customer" value="'+escapeHtml(v.customerName||"")+'"></div>'+
+        '<div class="field"><label>'+t('customerEmailLabel')+'</label><input id="f_customerEmail" type="email" value="'+escapeHtml(v.customerEmail||"")+'"></div>'+
+        '<div class="field"><label>'+t('customerPhoneLabel')+'</label><input id="f_customerPhone" value="'+escapeHtml(v.customerPhone||"")+'"></div>'+
+        '<div class="field"><label>'+t('vehicleLabel')+'</label><input id="f_name" value="'+escapeHtml(v.name)+'"></div>'+
+        '<div class="field-row">'+
+          '<div class="field"><label>'+t('yearLabel')+'</label><input id="f_year" type="number" value="'+escapeHtml(v.year||"")+'"></div>'+
+          '<div class="field"><label>'+t('makeLabel')+'</label><input id="f_make" value="'+escapeHtml(v.make||"")+'"></div>'+
+        '</div>'+
+        '<div class="field-row">'+
+          '<div class="field"><label>'+t('modelLabel')+'</label><input id="f_model" value="'+escapeHtml(v.model||"")+'"></div>'+
+          '<div class="field"><label>'+t('plateLabel')+'</label><input id="f_plate" value="'+escapeHtml(v.plate||"")+'"></div>'+
+        '</div>'+
+        '<div class="field"><label>'+t('currentMileageKm')+'</label><input id="f_mileage" type="number" min="0" value="'+v.currentMileage+'"></div>'+
+        '<div class="modal-actions">'+
+          '<button type="button" class="btn btn-ghost" id="cancelBtn">'+t('cancelBtn')+'</button>'+
+          '<button type="submit" class="btn btn-primary">'+t('saveChanges')+'</button>'+
+        '</div>'+
+      '</form>',
+      function(card){
+        card.querySelector('#cancelBtn').addEventListener('click', closeModal);
+        card.querySelector('#vehicleForm').addEventListener('submit', function(e){
+          e.preventDefault();
+          var name = card.querySelector('#f_name').value.trim();
+          var customer = card.querySelector('#f_customer').value.trim();
+          var mileage = parseInt(card.querySelector('#f_mileage').value,10);
+          if(!name || !customer || isNaN(mileage)){
+            showModalError(card, t('vehicleFormErr'));
+            return;
+          }
+          var fields = {
+            name: name,
+            customerName: customer,
+            customerEmail: card.querySelector('#f_customerEmail').value.trim().toLowerCase(),
+            customerPhone: card.querySelector('#f_customerPhone').value.trim(),
+            year: card.querySelector('#f_year').value.trim(),
+            make: card.querySelector('#f_make').value.trim(),
+            model: card.querySelector('#f_model').value.trim(),
+            plate: card.querySelector('#f_plate').value.trim(),
+            currentMileage: mileage
+          };
+          var submitBtn = card.querySelector('button[type="submit"]');
+          submitBtn.disabled = true;
+          fsUpdateVehicle(v.id, fields).then(function(){
+            closeModal();
+            render();
+          }).catch(function(err){
+            submitBtn.disabled = false;
+            showModalError(card, t('saveErr') + " " + err.message);
+          });
+        });
+      }
+    );
+  }
+
+  function openConfirmDeleteVehicle(v){
+    openModal(
+      '<h2 class="modal-title">'+t('removeVehicleTitle', {name: escapeHtml(v.name)})+'</h2>'+
+      '<div class="modal-sub">'+t('removeVehicleSub', {n: vehicleRecords(v.id).length})+'</div>'+
+      '<div class="modal-error" id="modalError"></div>'+
+      '<div class="modal-actions">'+
+        '<button type="button" class="btn btn-ghost" id="cancelBtn">'+t('cancelBtn')+'</button>'+
+        '<button type="button" class="btn btn-danger" id="confirmBtn">'+t('removeVehicleBtn')+'</button>'+
+      '</div>',
+      function(card){
+        card.querySelector('#cancelBtn').addEventListener('click', closeModal);
+        card.querySelector('#confirmBtn').addEventListener('click', function(){
+          var confirmBtn = card.querySelector('#confirmBtn');
+          confirmBtn.disabled = true;
+          fsDeleteVehicleCascade(v.id).then(function(){
+            state.view = "overview";
+            state.selectedVehicleId = null;
+            closeModal();
+            render();
+          }).catch(function(err){
+            confirmBtn.disabled = false;
+            showModalError(card, t('deleteErr') + " " + err.message);
+          });
+        });
+      }
+    );
+  }
+
+  function openEditCustomerModal(c){
+    openModal(
+      '<h2 class="modal-title">'+t('editCustomerTitle')+'</h2>'+
+      '<div class="modal-sub">'+t('editCustomerSub', {n: c.vehicles.length})+'</div>'+
+      '<div class="modal-error" id="modalError"></div>'+
+      '<form id="customerForm">'+
+        '<div class="field"><label>'+t('customerName')+'</label><input id="c_name" value="'+escapeHtml(c.name)+'"></div>'+
+        '<div class="field"><label>'+t('customerEmailLabel')+'</label><input id="c_email" type="email" value="'+escapeHtml(c.email)+'"></div>'+
+        '<div class="field"><label>'+t('customerPhoneLabel')+'</label><input id="c_phone" value="'+escapeHtml(c.phone)+'"></div>'+
+        '<div class="hint">'+t('emailChangeHint')+'</div>'+
+        '<div class="modal-actions">'+
+          '<button type="button" class="btn btn-ghost" id="cancelBtn">'+t('cancelBtn')+'</button>'+
+          '<button type="submit" class="btn btn-primary">'+t('saveChanges')+'</button>'+
+        '</div>'+
+      '</form>',
+      function(card){
+        card.querySelector('#cancelBtn').addEventListener('click', closeModal);
+        card.querySelector('#customerForm').addEventListener('submit', function(e){
+          e.preventDefault();
+          var name = card.querySelector('#c_name').value.trim();
+          var email = card.querySelector('#c_email').value.trim().toLowerCase();
+          var phone = card.querySelector('#c_phone').value.trim();
+          if(!name){
+            showModalError(card, t('enterCustomerName'));
+            return;
+          }
+          var submitBtn = card.querySelector('button[type="submit"]');
+          submitBtn.disabled = true;
+          fsUpdateVehiclesForCustomer(c.vehicles, {
+            customerName: name, customerEmail: email, customerPhone: phone
+          }).then(function(){
+            closeModal();
+            render();
+          }).catch(function(err){
+            submitBtn.disabled = false;
+            showModalError(card, t('saveErr') + " " + err.message);
+          });
+        });
+      }
+    );
+  }
+
+  function openRevokeAccessConfirm(c){
+    openModal(
+      '<h2 class="modal-title">'+t('revokeTitle', {name: escapeHtml(c.name)})+'</h2>'+
+      '<div class="modal-sub">'+t('revokeSub', {n: c.vehicles.length})+'</div>'+
+      '<div class="modal-error" id="modalError"></div>'+
+      '<div class="modal-actions">'+
+        '<button type="button" class="btn btn-ghost" id="cancelBtn">'+t('cancelBtn')+'</button>'+
+        '<button type="button" class="btn btn-danger" id="confirmBtn">'+t('revokeAccessConfirmBtn')+'</button>'+
+      '</div>',
+      function(card){
+        card.querySelector('#cancelBtn').addEventListener('click', closeModal);
+        card.querySelector('#confirmBtn').addEventListener('click', function(){
+          var confirmBtn = card.querySelector('#confirmBtn');
+          confirmBtn.disabled = true;
+          fsUpdateVehiclesForCustomer(c.vehicles, {customerEmail: ""}).then(function(){
+            closeModal();
+            render();
+          }).catch(function(err){
+            confirmBtn.disabled = false;
+            showModalError(card, t('revokeErr') + " " + err.message);
+          });
+        });
+      }
+    );
+  }
+
+  function typeOptionsHtml(selected){
+    return SERVICE_TYPES.map(function(st){
+      return '<option value="'+st.key+'" '+(st.key===selected?'selected':'')+'>'+typeLabel(st.key)+'</option>';
+    }).join("");
+  }
+
+  function openAddRecordModal(v){
+    var def = typeDefaults("oil_change");
+    openModal(
+      '<h2 class="modal-title">'+t('logMaintenanceTitle')+'</h2>'+
+      '<div class="modal-sub">'+t('forVehicle')+' '+escapeHtml(v.name)+'</div>'+
+      '<div class="modal-error" id="modalError"></div>'+
+      '<form id="recordForm">'+
+        '<div class="field"><label>'+t('serviceTypeLabel')+'</label><select id="f_type">'+typeOptionsHtml("oil_change")+'</select></div>'+
+        '<div class="field" id="customLabelField" style="display:none;"><label>'+t('customLabelLabel')+'</label><input id="f_customLabel" placeholder="'+t('customLabelPlaceholder')+'"></div>'+
+        '<div class="field-row">'+
+          '<div class="field"><label>'+t('datePerformed')+'</label><input id="f_date" type="date" value="'+todayISO()+'"></div>'+
+          '<div class="field"><label>'+t('mileageAtServiceKm')+'</label><input id="f_mileage" type="number" min="0" value="'+v.currentMileage+'"></div>'+
+        '</div>'+
+        '<div class="field"><label>'+t('remindAfterKm')+'</label><input id="f_intervalKm" type="number" min="0" value="'+def.km+'"></div>'+
+        intervalFieldHtml(def.days)+
+        '<div class="guess-line">'+
+          '<button type="button" class="btn btn-sm btn-ghost" id="guessBtn">'+t('guessFromPace')+'</button>'+
+          '<span class="guess-note" id="guessNote"></span>'+
+        '</div>'+
+        '<div class="hint" style="margin-top:8px;">'+t('whicheverFirstHint')+'</div>'+
+        '<div class="field" style="margin-top:14px;"><label>'+t('notesLabel')+'</label><textarea id="f_notes" placeholder="'+t('notesPlaceholder')+'"></textarea></div>'+
+        '<div class="modal-actions">'+
+          '<button type="button" class="btn btn-ghost" id="cancelBtn">'+t('cancelBtn')+'</button>'+
+          '<button type="submit" class="btn btn-primary">'+t('saveRecordBtn')+'</button>'+
+        '</div>'+
+      '</form>',
+      function(card){
+        var typeSelect = card.querySelector('#f_type');
+        var customField = card.querySelector('#customLabelField');
+        wireIntervalUnitToggle(card);
+        function syncCustom(){
+          customField.style.display = typeSelect.value==="custom" ? "block" : "none";
+          var d = typeDefaults(typeSelect.value);
+          card.querySelector('#f_intervalKm').value = d.km;
+          setIntervalFields(card, d.days);
+          card.querySelector('#guessNote').textContent = "";
+        }
+        typeSelect.addEventListener('change', syncCustom);
+        card.querySelector('#guessBtn').addEventListener('click', function(){
+          var kmInterval = parseInt(card.querySelector('#f_intervalKm').value,10) || def.km;
+          var est = estimateIntervalDays(v.id, kmInterval);
+          setIntervalFields(card, est.days);
+          card.querySelector('#guessNote').textContent = "≈"+Math.round(est.kmPerDay)+" "+t('kmPerDay')+", "+
+            (est.source==="history" ? t('guessFromHistory') : t('guessFallback'));
+        });
+        card.querySelector('#cancelBtn').addEventListener('click', closeModal);
+        card.querySelector('#recordForm').addEventListener('submit', function(e){
+          e.preventDefault();
+          var mileage = parseInt(card.querySelector('#f_mileage').value,10);
+          var date = card.querySelector('#f_date').value || todayISO();
+          var intervalKm = parseInt(card.querySelector('#f_intervalKm').value,10) || 0;
+          var intervalDays = readIntervalDays(card);
+          if(isNaN(mileage)){
+            showModalError(card, t('mileageAtServiceErr'));
+            return;
+          }
+          var record = {
+            vehicleId: v.id,
+            typeKey: typeSelect.value,
+            customLabel: typeSelect.value==="custom" ? card.querySelector('#f_customLabel').value.trim() : "",
+            date: date,
+            mileage: mileage,
+            intervalKm: intervalKm,
+            intervalDays: intervalDays,
+            notes: card.querySelector('#f_notes').value.trim()
+          };
+          var submitBtn = card.querySelector('button[type="submit"]');
+          submitBtn.disabled = true;
+          fsAddRecord(record).then(function(){
+            if(mileage > v.currentMileage){
+              return fsUpdateVehicle(v.id, {currentMileage: mileage});
+            }
+          }).then(function(){
+            closeModal();
+            render();
+          }).catch(function(err){
+            submitBtn.disabled = false;
+            showModalError(card, t('saveErr') + " " + err.message);
+          });
+        });
+      }
+    );
+  }
+
+  function openEditRecordModal(v, r){
+    openModal(
+      '<h2 class="modal-title">'+t('editRecordTitle')+'</h2>'+
+      '<div class="modal-sub">'+t('forVehicle')+' '+escapeHtml(v.name)+'</div>'+
+      '<div class="modal-error" id="modalError"></div>'+
+      '<form id="recordForm">'+
+        '<div class="field"><label>'+t('serviceTypeLabel')+'</label><select id="f_type">'+typeOptionsHtml(r.typeKey)+'</select></div>'+
+        '<div class="field" id="customLabelField" style="display:'+(r.typeKey==="custom"?"block":"none")+';"><label>'+t('customLabelLabel')+'</label><input id="f_customLabel" value="'+escapeHtml(r.customLabel||"")+'"></div>'+
+        '<div class="field-row">'+
+          '<div class="field"><label>'+t('datePerformed')+'</label><input id="f_date" type="date" value="'+r.date+'"></div>'+
+          '<div class="field"><label>'+t('mileageAtServiceKm')+'</label><input id="f_mileage" type="number" min="0" value="'+r.mileage+'"></div>'+
+        '</div>'+
+        '<div class="field"><label>'+t('remindAfterKm')+'</label><input id="f_intervalKm" type="number" min="0" value="'+r.intervalKm+'"></div>'+
+        intervalFieldHtml(r.intervalDays||180)+
+        '<div class="guess-line">'+
+          '<button type="button" class="btn btn-sm btn-ghost" id="guessBtn">'+t('guessFromPace')+'</button>'+
+          '<span class="guess-note" id="guessNote"></span>'+
+        '</div>'+
+        '<div class="field" style="margin-top:14px;"><label>'+t('notesLabel')+'</label><textarea id="f_notes">'+escapeHtml(r.notes||"")+'</textarea></div>'+
+        '<div class="modal-actions">'+
+          '<button type="button" class="btn btn-ghost" id="cancelBtn">'+t('cancelBtn')+'</button>'+
+          '<button type="submit" class="btn btn-primary">'+t('saveChanges')+'</button>'+
+        '</div>'+
+      '</form>',
+      function(card){
+        var typeSelect = card.querySelector('#f_type');
+        var customField = card.querySelector('#customLabelField');
+        wireIntervalUnitToggle(card);
+        typeSelect.addEventListener('change', function(){
+          customField.style.display = typeSelect.value==="custom" ? "block" : "none";
+        });
+        card.querySelector('#guessBtn').addEventListener('click', function(){
+          var kmInterval = parseInt(card.querySelector('#f_intervalKm').value,10) || 8000;
+          var est = estimateIntervalDays(v.id, kmInterval);
+          setIntervalFields(card, est.days);
+          card.querySelector('#guessNote').textContent = "≈"+Math.round(est.kmPerDay)+" "+t('kmPerDay')+", "+
+            (est.source==="history" ? t('guessFromHistory') : t('guessFallback'));
+        });
+        card.querySelector('#cancelBtn').addEventListener('click', closeModal);
+        card.querySelector('#recordForm').addEventListener('submit', function(e){
+          e.preventDefault();
+          var mileage = parseInt(card.querySelector('#f_mileage').value,10);
+          if(isNaN(mileage)){
+            showModalError(card, t('mileageAtServiceErr'));
+            return;
+          }
+          var fields = {
+            typeKey: typeSelect.value,
+            customLabel: typeSelect.value==="custom" ? card.querySelector('#f_customLabel').value.trim() : "",
+            date: card.querySelector('#f_date').value || r.date,
+            mileage: mileage,
+            intervalKm: parseInt(card.querySelector('#f_intervalKm').value,10) || 0,
+            intervalDays: readIntervalDays(card),
+            notes: card.querySelector('#f_notes').value.trim()
+          };
+          var submitBtn = card.querySelector('button[type="submit"]');
+          submitBtn.disabled = true;
+          fsUpdateRecord(r.id, fields).then(function(){
+            closeModal();
+            render();
+          }).catch(function(err){
+            submitBtn.disabled = false;
+            showModalError(card, t('saveErr') + " " + err.message);
+          });
+        });
+      }
+    );
+  }
+
+  function openSettingsModal(){
+    var admins = state.settings.adminEmails || [];
+    var myEmail = (state.user && state.user.email || '').toLowerCase();
+    var adminRowsHtml = admins.map(function(email){
+      var isSelf = email === myEmail;
+      var isLastAdmin = admins.length === 1;
+      return (
+        '<div class="alert-row" style="cursor:default;padding:9px 12px;">'+
+          '<div class="alert-main"><div class="alert-veh" style="font-size:13px;">'+escapeHtml(email)+(isSelf?' <span class="hint">'+t('youTag')+'</span>':'')+'</div></div>'+
+          (isLastAdmin
+            ? '<span class="hint">'+t('lastAdminCantRemove')+'</span>'
+            : '<button type="button" class="btn btn-sm btn-danger" data-remove-admin="'+escapeHtml(email)+'">'+t('removeBtn')+'</button>')+
+        '</div>'
+      );
+    }).join("");
+
+    openModal(
+      '<h2 class="modal-title">'+t('stationSettingsTitle')+'</h2>'+
+      '<div class="modal-sub">'+t('stationSettingsSub')+'</div>'+
+      '<div class="modal-error" id="modalError"></div>'+
+      '<form id="settingsForm">'+
+        '<div class="field"><label>'+t('stationNameLabel')+'</label><input id="s_name" value="'+escapeHtml(state.settings.stationName||"")+'" placeholder="e.g. Riverside Fuel &amp; Service"></div>'+
+        '<div class="field"><label>'+t('tagDeptLabel')+'</label><input id="s_tag" value="'+escapeHtml(state.settings.tagline||"")+'" placeholder="e.g. Service Bay"></div>'+
+        '<div class="field"><label>'+t('stationPhoneLabel')+'</label><input id="s_phone" value="'+escapeHtml(state.settings.phone||"")+'" placeholder="e.g. (555) 010-4477"></div>'+
+        '<div class="modal-actions">'+
+          '<button type="button" class="btn btn-ghost" id="cancelBtn">'+t('cancelBtn')+'</button>'+
+          '<button type="submit" class="btn btn-primary">'+t('saveBtn')+'</button>'+
+        '</div>'+
+      '</form>'+
+      '<div style="border-top:1px solid var(--surface-border);margin-top:22px;padding-top:18px;">'+
+        '<h3 style="font-family:var(--display);font-size:16px;margin:0 0 4px;">'+t('administratorsTitle')+'</h3>'+
+        '<div class="hint" style="margin-bottom:12px;line-height:1.6;">'+t('administratorsDesc')+'</div>'+
+        '<div id="adminList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">'+adminRowsHtml+'</div>'+
+        '<div class="modal-error" id="adminError"></div>'+
+        '<div class="interval-row">'+
+          '<input id="newAdminEmail" type="email" placeholder="'+t('addAdminEmailPlaceholder')+'">'+
+          '<button type="button" class="btn btn-sm btn-primary" id="addAdminBtn" style="width:auto;">'+t('addBtn')+'</button>'+
+        '</div>'+
+      '</div>',
+      function(card){
+        card.querySelector('#cancelBtn').addEventListener('click', closeModal);
+        card.querySelector('#settingsForm').addEventListener('submit', function(e){
+          e.preventDefault();
+          var fields = {
+            stationName: card.querySelector('#s_name').value.trim() || t('stationNameDefault'),
+            tagline: card.querySelector('#s_tag').value.trim(),
+            phone: card.querySelector('#s_phone').value.trim()
+          };
+          var submitBtn = card.querySelector('button[type="submit"]');
+          submitBtn.disabled = true;
+          fsSaveSettings(fields).then(function(){
+            closeModal();
+          }).catch(function(err){
+            submitBtn.disabled = false;
+            showModalError(card, t('saveErr') + " " + err.message);
+          });
+        });
+
+        var adminErr = card.querySelector('#adminError');
+        function showAdminError(msg){ adminErr.textContent = msg; adminErr.style.display = 'block'; }
+
+        card.querySelector('#addAdminBtn').addEventListener('click', function(){
+          var input = card.querySelector('#newAdminEmail');
+          var email = input.value.trim().toLowerCase();
+          adminErr.style.display = 'none';
+          if(!email){ showAdminError(t('enterEmailAddress')); return; }
+          var current = state.settings.adminEmails || [];
+          if(current.indexOf(email) !== -1){ showAdminError(t('alreadyAdmin')); return; }
+          var updated = current.concat([email]);
+          this.disabled = true;
+          var btn = this;
+          fsSaveSettings({adminEmails: updated}).then(function(){
+            closeModal();
+            openSettingsModal();
+          }).catch(function(err){
+            btn.disabled = false;
+            showAdminError(t('couldNotAdd') + " " + err.message);
+          });
+        });
+
+        card.querySelectorAll('[data-remove-admin]').forEach(function(btn){
+          btn.addEventListener('click', function(){
+            var email = btn.getAttribute('data-remove-admin');
+            var current = state.settings.adminEmails || [];
+            if(current.length <= 1){ showAdminError(t('cantRemoveLastAdmin')); return; }
+            if(!confirm(t('confirmRemoveAdmin', {email: email}))) return;
+            var updated = current.filter(function(e){ return e !== email; });
+            btn.disabled = true;
+            fsSaveSettings({adminEmails: updated}).then(function(){
+              closeModal();
+              openSettingsModal();
+            }).catch(function(err){
+              btn.disabled = false;
+              showAdminError(t('couldNotRemove') + " " + err.message);
+            });
+          });
+        });
+      },
+      true
+    );
+  }
+
+  /* ============ Firestore setup modal ============ */
+  function openFirestoreModal(){
+    var cfg = loadFirebaseConfig();
+    var cfgText = cfg ? JSON.stringify(cfg, null, 2) : "";
+    openModal(
+      '<h2 class="modal-title">'+t('connectFirestoreTitle')+'</h2>'+
+      '<div class="status-line"><span class="status-dot '+(state.dbConnected?'dot-green':'dot-gray')+'"></span>'+(state.dbConnected?t('connectedStatus'):t('notConnectedStatus'))+'</div>'+
+      '<div class="modal-note">'+
+        t('firestoreSetupIntro')+' <a href="https://console.firebase.google.com" target="_blank" rel="noopener" style="color:var(--amber);">'+t('firestoreConsole')+'</a>:'+
+        '<ol>'+
+          '<li>'+t('firestoreStep1')+'</li>'+
+          '<li>'+t('firestoreStep2')+'</li>'+
+          '<li>'+t('firestoreStep3')+'</li>'+
+          '<li>'+t('firestoreStep4')+'</li>'+
+        '</ol>'+
+      '</div>'+
+      '<div class="modal-error" id="modalError"></div>'+
+      '<form id="fbForm">'+
+        '<div class="field"><label>'+t('firebaseConfigLabel')+'</label><textarea class="mono" id="f_cfg" placeholder=\'{\n  apiKey: "…",\n  authDomain: "…",\n  projectId: "…",\n  storageBucket: "…",\n  messagingSenderId: "…",\n  appId: "…"\n}\'>'+escapeHtml(cfgText)+'</textarea></div>'+
+        '<div class="modal-actions">'+
+          (state.dbConnected ? '<button type="button" class="btn btn-danger" id="disconnectBtn">'+t('disconnectBtn')+'</button>' : '')+
+          '<button type="button" class="btn btn-ghost" id="cancelBtn">'+t('cancelBtn')+'</button>'+
+          '<button type="submit" class="btn btn-primary">'+(state.dbConnected ? t('reconnectBtn') : t('connectBtn'))+'</button>'+
+        '</div>'+
+      '</form>',
+      function(card){
+        card.querySelector('#cancelBtn').addEventListener('click', closeModal);
+        var disc = card.querySelector('#disconnectBtn');
+        if(disc){
+          disc.addEventListener('click', function(){
+            clearFirebaseConfigLocal();
+            window.location.reload();
+          });
+        }
+        card.querySelector('#fbForm').addEventListener('submit', function(e){
+          e.preventDefault();
+          var raw = card.querySelector('#f_cfg').value.trim();
+          if(!raw){ showModalError(card, t('pasteConfigErr')); return; }
+          var parsed;
+          try{
+            parsed = Function('"use strict"; return (' + raw + ');')();
+          }catch(err){
+            showModalError(card, t('badConfigErr'));
+            return;
+          }
+          if(!parsed || !parsed.projectId || !parsed.apiKey){
+            showModalError(card, t('incompleteConfigErr'));
+            return;
+          }
+          saveFirebaseConfigLocal(parsed);
+          window.location.reload();
+        });
+      },
+      true
+    );
+  }
+
+  /* ============ Firestore data layer ============ */
+  function fsAddVehicle(v){
+    return addDoc(collection(db,'vehicles'), v).then(function(ref){ return ref.id; });
+  }
+  function fsUpdateVehicle(id, fields){
+    return updateDoc(doc(db,'vehicles',id), fields);
+  }
+  function fsUpdateVehiclesForCustomer(vehicles, fields){
+    var batch = writeBatch(db);
+    vehicles.forEach(function(v){
+      batch.update(doc(db,'vehicles',v.id), fields);
+    });
+    return batch.commit();
+  }
+  function fsDeleteVehicleCascade(id){
+    var q = query(collection(db,'records'), where('vehicleId','==',id));
+    return getDocs(q).then(function(snap){
+      var batch = writeBatch(db);
+      snap.forEach(function(d){ batch.delete(d.ref); });
+      batch.delete(doc(db,'vehicles',id));
+      return batch.commit();
+    });
+  }
+  function fsAddRecord(r){
+    return addDoc(collection(db,'records'), r);
+  }
+  function fsUpdateRecord(id, fields){
+    return updateDoc(doc(db,'records',id), fields);
+  }
+  function fsDeleteRecord(id){
+    return deleteDoc(doc(db,'records',id));
+  }
+  function fsSaveSettings(fields){
+    return setDoc(doc(db,'settings','station'), fields, {merge:true});
+  }
+
+  /* ============ Role-aware data subscriptions ============ */
+  function teardownDataSubscriptions(){
+    if(unsubVehicles){ unsubVehicles(); unsubVehicles=null; }
+    if(unsubRecords){ unsubRecords(); unsubRecords=null; }
+    state.vehicles = [];
+    state.records = [];
+    state.subscribedRole = null;
+  }
+
+  function subscribeAdmin(){
+    unsubVehicles = onSnapshot(collection(db,'vehicles'), function(snap){
+      state.vehicles = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      render();
+    }, function(err){ alertError('Vehicles sync error', err); });
+
+    unsubRecords = onSnapshot(collection(db,'records'), function(snap){
+      state.records = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      render();
+    }, function(err){ alertError('Records sync error', err); });
+  }
+
+  function subscribeCustomer(email){
+    var q = query(collection(db,'vehicles'), where('customerEmail','==',email));
+    unsubVehicles = onSnapshot(q, function(snap){
+      state.vehicles = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      var ids = state.vehicles.map(function(v){ return v.id; }).slice(0,10); // Firestore 'in' query max
+      if(unsubRecords){ unsubRecords(); unsubRecords=null; }
+      if(ids.length){
+        var rq = query(collection(db,'records'), where('vehicleId','in',ids));
+        unsubRecords = onSnapshot(rq, function(rsnap){
+          state.records = rsnap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+          render();
+        }, function(err){ alertError('Records sync error', err); });
+      } else {
+        state.records = [];
+      }
+      render();
+    }, function(err){ alertError('Vehicles sync error', err); });
+  }
+
+  function subscribeForRole(){
+    var key = state.role + ':' + (state.user ? state.user.uid : '');
+    if(state.subscribedRole === key) return;
+    teardownDataSubscriptions();
+    state.subscribedRole = key;
+    if(state.role === 'admin'){
+      subscribeAdmin();
+    } else if(state.role === 'customer' && state.user){
+      subscribeCustomer((state.user.email||'').toLowerCase());
+    }
+  }
+
+  function resolveRole(){
+    if(!state.user){ state.role = null; return; }
+    var admins = state.settings.adminEmails || [];
+    var email = (state.user.email||'').toLowerCase();
+    if(admins.length === 0){
+      // Bootstrap: first person to ever sign in becomes the administrator.
+      admins = [email];
+      setDoc(doc(db,'settings','station'), {adminEmails: admins}, {merge:true}).catch(function(err){
+        alertError('Could not set up administrator account', err);
+      });
+      state.settings.adminEmails = admins;
+    }
+    state.role = admins.indexOf(email) !== -1 ? 'admin' : 'customer';
+    subscribeForRole();
+  }
+
+  function subscribeSettings(){
+    if(unsubSettings) return;
+    unsubSettings = onSnapshot(doc(db,'settings','station'), function(snap){
+      if(snap.exists()){
+        state.settings = Object.assign(state.settings, snap.data());
+        saveSavedSettings(state.settings);
+      }
+      renderBrand();
+      resolveRole();
+      render();
+    }, function(err){
+      // Likely still signed out or rules not yet configured — non-fatal.
+      renderBrand();
+      render();
+    });
+  }
+
+  /* ============ Password reset (REST fallback) ============ */
+  // firebase-bundle.js is a trimmed build that doesn't include sendPasswordResetEmail,
+  // so we call the Identity Toolkit REST API directly with the project's apiKey instead.
+  function restSendPasswordResetEmail(apiKey, email){
+    return fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + encodeURIComponent(apiKey), {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ requestType: 'PASSWORD_RESET', email: email })
+    }).then(function(res){
+      return res.json().catch(function(){ return {}; }).then(function(data){
+        if(!res.ok){
+          var code = (data && data.error && data.error.message) || 'REQUEST_FAILED';
+          var friendly = {
+            EMAIL_NOT_FOUND: 'No account found with that email.',
+            INVALID_EMAIL: 'That email address looks invalid.',
+            MISSING_EMAIL: 'Enter an email address first.'
+          }[code];
+          throw new Error(friendly || code);
+        }
+        return data;
+      });
+    });
+  }
+
+  /* ============ Firebase connect + auth wiring ============ */
+  function connectFirestore(cfg){
+    state.dbConnecting = true;
+    render();
+    try{
+      app = initializeApp(cfg);
+      db = getFirestore(app);
+      auth = getAuth(app);
+      activeFirebaseApiKey = cfg && cfg.apiKey ? cfg.apiKey : null;
+    }catch(err){
+      state.dbConnecting = false;
+      render();
+      alertError('Could not initialize Firebase', err);
+      return;
+    }
+    state.dbConnected = true;
+    state.dbConnecting = false;
+
+    onAuthStateChanged(auth, function(user){
+      state.user = user;
+      if(user){
+        subscribeSettings();
+      } else {
+        if(unsubSettings){ unsubSettings(); unsubSettings=null; }
+        teardownDataSubscriptions();
+        state.role = null;
+      }
+      render();
+    });
+
+    render();
+  }
+
+  function doSignOut(){
+    signOut(auth).catch(function(err){ alertError('Could not sign out', err); });
+  }
+
+  /* ============ Export ============ */
+  function exportData(){
+    var payload = {
+      exportedAt: new Date().toISOString(),
+      station: state.settings,
+      vehicles: state.vehicles,
+      records: state.records
+    };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = "service-tracker-export.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  /* ============ Init ============ */
+  function applyLangToDocument(){
+    document.documentElement.lang = state.lang;
+    document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+  }
+  applyLangToDocument();
+
+  document.querySelectorAll('#langSwitch button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var lang = btn.getAttribute('data-lang');
+      if(lang === state.lang) return;
+      state.lang = lang;
+      saveLang(lang);
+      applyLangToDocument();
+      renderBrand();
+      render();
+    });
+  });
+
+  document.getElementById('addVehicleBtn').addEventListener('click', openAddVehicleModal);
+  document.getElementById('addVehicleTile').addEventListener('click', openAddVehicleModal);
+  document.getElementById('exportBtn').addEventListener('click', exportData);
+  document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
+  document.getElementById('dbStatusBtn').addEventListener('click', openFirestoreModal);
+  document.getElementById('signOutBtn').addEventListener('click', doSignOut);
+  saveSavedSettings(state.settings);
+  document.getElementById('navOverview').addEventListener('click', function(){
+    state.view = "overview";
+    render();
+  });
+  document.getElementById('navCustomers').addEventListener('click', function(){
+    if(!isAdmin()) return;
+    state.view = "customers";
+    render();
+  });
+
+  renderBrand();
+  render();
+  var existingCfg = loadFirebaseConfig();
+  if(existingCfg){
+    connectFirestore(existingCfg);
+  }
+
+})();
+</script>
+</body>
+</html>

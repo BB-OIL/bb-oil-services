@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null && request.auth.token.email != null;
+    }
+
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/settings/station) &&
+        request.auth.token.email in get(/databases/$(database)/documents/settings/station).data.adminEmails;
+    }
+
+    match /settings/{docId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /vehicles/{vehicleId} {
+      allow read: if signedIn() && (
+        isAdmin() ||
+        resource.data.customerEmail == request.auth.token.email
+      );
+
+      allow create: if isAdmin();
+
+      allow update: if isAdmin() || (
+        signedIn() &&
+        resource.data.customerEmail == request.auth.token.email &&
+        request.resource.data.customerEmail == request.auth.token.email
+      );
+
+      allow delete: if isAdmin();
+    }
+
+    match /records/{recordId} {
+      allow read: if signedIn() && (
+        isAdmin() ||
+        get(/databases/$(database)/documents/vehicles/$(resource.data.vehicleId)).data.customerEmail == request.auth.token.email
+      );
+
+      allow create: if signedIn() && (
+        isAdmin() ||
+        get(/databases/$(database)/documents/vehicles/$(request.resource.data.vehicleId)).data.customerEmail == request.auth.token.email
+      );
+
+      allow update: if signedIn() && (
+        isAdmin() ||
+        get(/databases/$(database)/documents/vehicles/$(resource.data.vehicleId)).data.customerEmail == request.auth.token.email
+      );
+
+      allow delete: if isAdmin();
+    }
+  }
+}

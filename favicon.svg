@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="BB-OIL logo">
+  <rect width="128" height="128" fill="#0B5BB7"/>
+  <circle cx="64" cy="64" r="40" fill="#F5F7FA"/>
+  <path d="M64 19 L74 47 L103 53 L79 71 L85 101 L64 85 L43 101 L49 71 L25 53 L54 47 Z" fill="#F38B2C"/>
+  <path d="M64 32 L70.5 49.5 L89 54 L72.8 67.5 L77.4 86.5 L64 77.5 L50.6 86.5 L55.2 67.5 L39 54 L57.5 49.5 Z" fill="#F38B2C" opacity="0.9"/>
+</svg>
