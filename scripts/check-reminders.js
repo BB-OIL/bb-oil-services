@@ -21,21 +21,21 @@ const db = admin.firestore();
 const messaging = admin.messaging();
 
 const SERVICE_TYPES = [
-  { key: "oil_change", label: "Oil & filter change" },
-  { key: "tire_rotation", label: "Tire rotation" },
-  { key: "brake_inspection", label: "Brake inspection" },
-  { key: "brake_fluid", label: "Brake fluid flush" },
-  { key: "air_filter", label: "Air filter replacement" },
-  { key: "fuel_filter", label: "Fuel filter change" },
-  { key: "cabin_filter", label: "Cabin air filter" },
-  { key: "battery_check", label: "Battery check" },
-  { key: "coolant_flush", label: "Coolant flush" },
-  { key: "transmission_fluid", label: "Transmission fluid" },
-  { key: "spark_plugs", label: "Spark plugs" },
-  { key: "timing_belt", label: "Timing belt" },
-  { key: "wheel_alignment", label: "Wheel alignment" },
-  { key: "ac_service", label: "A/C service" },
-  { key: "wiper_blades", label: "Wiper blades" }
+  { key: "oil_change", label: "Vidange et filtre à huile" },
+  { key: "tire_rotation", label: "Permutation des pneus" },
+  { key: "brake_inspection", label: "Inspection des freins" },
+  { key: "brake_fluid", label: "Purge du liquide de frein" },
+  { key: "air_filter", label: "Remplacement du filtre à air" },
+  { key: "fuel_filter", label: "Changement du filtre à carburant" },
+  { key: "cabin_filter", label: "Filtre d'habitacle" },
+  { key: "battery_check", label: "Contrôle de la batterie" },
+  { key: "coolant_flush", label: "Purge du liquide de refroidissement" },
+  { key: "transmission_fluid", label: "Liquide de transmission" },
+  { key: "spark_plugs", label: "Bougies d'allumage" },
+  { key: "timing_belt", label: "Courroie de distribution" },
+  { key: "wheel_alignment", label: "Parallélisme des roues" },
+  { key: "ac_service", label: "Entretien climatisation" },
+  { key: "wiper_blades", label: "Balais d'essuie-glace" }
 ];
 
 function daysBetween(isoA, isoB) {
@@ -149,9 +149,9 @@ async function main() {
 
           const shouldNotify = (status === "soon" || status === "overdue") && status !== prevStatus;
           if (shouldNotify) {
-            const vehicleName = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") || "Your vehicle";
-            const title = status === "overdue" ? "Service overdue" : "Service due soon";
-            const body = `${vehicleName}: ${entry.label} is ${status === "overdue" ? "overdue" : "coming up"}.`;
+            const vehicleName = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") || "Votre véhicule";
+            const title = status === "overdue" ? "Entretien en retard" : "Entretien à venir";
+            const body = `${vehicleName} : ${entry.label} est ${status === "overdue" ? "en retard" : "bientôt à effectuer"}.`;
             await sendToEmails([vehicle.customerEmail, ...adminEmails], title, body, {
               vehicleId: vehicle.id,
               serviceKey: entry.key,
